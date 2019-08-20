@@ -21,15 +21,19 @@ from math import *
 import numpy as np
 import csv
 from utils.graph import Graph
+from utils.polygon import Polygon
 
 def init():
     """Initialize global variables."""
 
     global ROT_X, ROT_Y, ROT_Z
-    global eps, EPS, solid
+    global eps, EPS
+    global solid, solid_graph
     global lastX, lastY, solid_color, bg_color
+    global factor
 
-    solid = scale(read_solid("octahedron"),factor = 150)
+    factor = 100
+    solid = scale(read_solid("tetrahedron"),factor)
 
     # counter-clockwise rotation about the X axis
     ROT_X = lambda x: np.transpose(np.array([[1.,0.,0.],
@@ -54,8 +58,8 @@ def init():
 
     lastX = 0 
     lastY = 0
-    solid_color = 'blue'
-    bg_color = 'white'
+    solid_color = 'white'
+    bg_color = 'black'
 
 def createZeroMat(m,n):
     """Return a matrix (m x n) filled with zeros."""
@@ -67,14 +71,17 @@ def translate(x,y,dx,dy):
 
     return x+dx, y+dy
 
-def scale(solid,factor = 100):
+def dist(p1,p2):
+    """Computes the distance between two points."""
+    return sqrt(pow((p1[0]-p2[0]),2) + pow((p1[1]-p2[1]),2) + pow((p1[2]-p2[2]),2))
+
+def scale(solid,factor):
 
     return solid@(np.array([[factor,0.,0.],
-                             [0.,factor,0.],
-                             [0.,0.,factor]]))
+                            [0.,factor,0.],
+                            [0.,0.,factor]]))
 
 def draw_solid(solid,col):
-    """Draw a solid."""
 
     w = canvas.winfo_width()/2
     h = canvas.winfo_height()/2
@@ -84,9 +91,8 @@ def draw_solid(solid,col):
     # draw the edges of the solid
     for p1 in range(nv):
         for p2 in range(p1+1,nv):
-            
             canvas.create_line(translate(solid[p1][0], solid[p1][1], w, h),
-                               translate(solid[p2][0], solid[p2][1], w, h), fill = col)
+                           translate(solid[p2][0], solid[p2][1], w, h), fill = col)
 
 def read_solid(solid_name):
     """Read the solid coordinates from a csv file."""
@@ -94,15 +100,27 @@ def read_solid(solid_name):
     filename = "solids/" + solid_name + ".csv"
     
     points = []
+    p = Polygon()
 
     with open(filename) as csvfile:
+
         readCSV = csv.reader(csvfile, delimiter=',')
+        
         for row in readCSV:
+            if(row[0] == 'v'):
+        
+                v = np.array([float(row[1]),float(row[2]),float(row[3])])
+                p.append_vertice(v)
 
-            points.append(np.array([float(row[0]),float(row[1]),float(row[2])]))
+            elif(row[0] == 'f'):
+                
+                f = []
+                for i in range(1,len(row)):
+                   f.append(int(row[i]))
+                p.append_face(f)
 
-    #print(points)
-    return np.array(points)
+    print(p.get_faces())            
+    return p.get_vertex()
 
 def cbClicked(event):
     """Save current mouse position."""
