@@ -1,3 +1,5 @@
+import numpy as np
+
 class Polygon:
 
     def __init__(self, *args, **kwargs):

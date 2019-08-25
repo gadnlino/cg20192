@@ -66,20 +66,33 @@ def createZeroMat(m,n):
 
     return np.zeros((m,n))
 
-def translate(x,y,dx,dy):
+def translate(vec,dx,dy):
     """Translate vector(x,y) by (dx,dy)."""
 
     return x+dx, y+dy
 
 def dist(p1,p2):
     """Computes the distance between two points."""
-    return sqrt(pow((p1[0]-p2[0]),2) + pow((p1[1]-p2[1]),2) + pow((p1[2]-p2[2]),2))
+    diff = p1-p2
+    return diff@diff
 
 def scale(solid,factor):
 
     return solid@(np.array([[factor,0.,0.],
                             [0.,factor,0.],
                             [0.,0.,factor]]))
+
+def project(point,axis):
+    """Projects the point on the specified axis."""
+    if(axis == 'x'):
+        point[0] = 0
+    elif(axis == 'y'):
+        point[1] = 0
+    elif(axis == 'z'):
+        point[2] = 0
+    
+    return point
+
 
 def draw_solid(solid,col):
 
@@ -91,6 +104,8 @@ def draw_solid(solid,col):
     # draw the edges of the solid
     for p1 in range(nv):
         for p2 in range(p1+1,nv):
+            p1 = project(p1,'z')
+            p2 = project(p2,'z')
             canvas.create_line(translate(solid[p1][0], solid[p1][1], w, h),
                            translate(solid[p2][0], solid[p2][1], w, h), fill = col)
 
@@ -121,6 +136,9 @@ def read_solid(solid_name):
 
     print(p.get_faces())            
     return p.get_vertex()
+
+
+########## TRATANDO EVENTOS DO MOUSE ############
 
 def cbClicked(event):
     """Save current mouse position."""
