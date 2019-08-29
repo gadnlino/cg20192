@@ -67,9 +67,8 @@ def drawTet(tet,col):
     for p1 in range(nv):
         for p2 in range(p1+1,nv):
 
-            print(translate(tet[p1], w, h))
-            canvas.create_line(tuple(translate(tet[p1], w, h)),
-                               tuple(translate(tet[p2], w, h)), fill = col)
+            canvas.create_line(tuple(truncate(translate(hom(tet[p1]), w, h))),
+                               tuple(truncate(translate(hom(tet[p2]), w, h))), fill = col)
 
 def init():
     """Initialize global variables."""
