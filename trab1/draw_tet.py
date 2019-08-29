@@ -57,6 +57,10 @@ def truncate(m):
     """Projects vector m to the (x,y,0) plane."""
     return np.array([m[0],m[1]])
 
+def is_visible(v):
+    
+    return v[2] > 0
+
 def drawTet(tet,col):
     """Draw a tetrahedron."""
 
@@ -72,6 +76,32 @@ def drawTet(tet,col):
             canvas.create_line(tuple(truncate(translate(hom(tet[p1]), w, h))),
                                tuple(truncate(translate(hom(tet[p2]), w, h))), fill = col)
 
+
+    nf = len(tet_faces)
+
+    #drawing normal vectors
+    for i in range(nf):
+        f = tet_faces[i]
+
+        centr = (tet[f[0]] + tet[f[1]] + tet[f[2]])/3
+        
+        v1 = tet[f[1]] - tet[f[0]]
+        v2 = tet[f[2]] - tet[f[0]]
+
+        perp = np.cross(v1,v2)
+        perp = perp / np.linalg.norm(perp)
+       
+        
+        if(is_visible(perp)):
+            
+            canvas.create_line(tuple(truncate(translate(hom(centr), w, h))),
+                               tuple(truncate(translate(hom(centr + 100*perp), w, h))), fill = "black", arrow = LAST)
+            print("{x} are visible".format(x = perp)) 
+        else:
+             print(perp)
+
+    print()  
+
 def init():
     """Initialize global variables."""
 
@@ -80,7 +110,8 @@ def init():
     global lastX, lastY, tetColor, bgColor
 
     tet = np.array([[0.,-100.,0.],[-100.,100.,0.],[100.,100.,0.],[0.,0.,200.]])
-    #tet_faces = np.array([[],[]])
+    tet_faces = np.array([[0,1,2],[0,2,3],[0,3,1],[2,1,3]])
+
     # counter-clockwise rotation about the X axis
     ROT_X = lambda x: np.array([[1,0,0],[0,cos(x),-sin(x)], [0,sin(x),cos(x)]])
 
