@@ -50,9 +50,11 @@ def translate(v,dx,dy):
     return transl_matrix@v
 
 def hom(m):
+    """Homogenous coordinates for vector m."""
     return np.array([m[0],m[1],1.]) 
 
 def truncate(m):
+    """Projects vector m to the (x,y,0) plane."""
     return np.array([m[0],m[1]])
 
 def drawTet(tet,col):
