@@ -20,6 +20,7 @@
 
 
 import numpy as np
+import random
 try:
    from tkinter import *     # python 3
 except ImportError:
@@ -72,31 +73,45 @@ def drawTet(tet,col):
     # draw the 6 edges of the tetrahedron
     for p1 in range(nv):
         for p2 in range(p1+1,nv):
-
+            
             canvas.create_line(tuple(truncate(translate(hom(tet[p1]), w, h))),
                                tuple(truncate(translate(hom(tet[p2]), w, h))), fill = col)
 
 
     nf = len(tet_faces)
 
-    #drawing normal vectors
+    #drawing normal vectors and filling faces
     for i in range(nf):
         f = tet_faces[i]
 
-        centr = (tet[f[0]] + tet[f[1]] + tet[f[2]])/3
+        p1 = tet[f[0]]
+        p2 = tet[f[1]]
+        p3 = tet[f[2]]
+
+        centr = (p1 + p2 + p3)/3
         
-        v1 = tet[f[1]] - tet[f[0]]
-        v2 = tet[f[2]] - tet[f[0]]
+        v1 = p2 - p1
+        v2 = p3 - p1
 
         perp = np.cross(v1,v2)
         perp = perp / np.linalg.norm(perp)
        
-        
+        colors = ["red","green","blue","yellow","orange","gray","purple"]
+
         if(is_visible(perp)):
-            
-            canvas.create_line(tuple(truncate(translate(hom(centr), w, h))),
-                               tuple(truncate(translate(hom(centr + 100*perp), w, h))), fill = "black", arrow = LAST)
-            print("{x} are visible".format(x = perp)) 
+
+            p1_t = truncate(translate(hom(p1), w, h))
+            p2_t = truncate(translate(hom(p2), w, h))
+            p3_t = truncate(translate(hom(p3), w, h))
+            centr_t = truncate(translate(hom(centr), w, h))
+            norm_t = truncate(translate(hom(centr + 100*perp), w, h))
+
+            canvas.create_line(tuple(centr_t),
+                               tuple(norm_t), fill = "black", arrow = LAST)
+            print("{x} are visible".format(x = perp))
+
+            polygon_points = [tuple(p1_t),tuple(p2_t),tuple(p3_t),tuple(p1_t)]
+            canvas.create_polygon(polygon_points,fill = random.choice(colors), outline = "black", width = 3)
         else:
              print(perp)
 
