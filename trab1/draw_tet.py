@@ -253,20 +253,23 @@ def cbMottion(event):
     cbClicked(event)   
 
 def wheelUp(event):
+   # print("scroll pra cima")
     """Map mouse wheel up displacements to rotations about Z axis."""
 
     global tet
-    tet = matMul(tet,ROT_Z(EPS(event.delta/120)))
+    tet = matMul(tet,ROT_Z(EPS(10)))
     drawTet(tet,tetColor)
 
 def wheelDown(event):
+    #print("scroll pra baixo")
     """Map mouse wheel down displacements to rotations about Z axis."""
 
     global tet
-    tet = matMul(tet,ROT_Z(EPS(event.delta/120)))
+    tet = matMul(tet,ROT_Z(EPS(-10)))
     drawTet(tet,tetColor)
 
 def wheel(event):
+    #print("scroll")
     """Map mouse wheel displacements to rotations about Z axis."""
 
     global tet
