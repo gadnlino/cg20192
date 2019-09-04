@@ -3,20 +3,20 @@
 #
 ## @package _12_tet
 #
-#  Draws a 3D tetrahedron and allows a user to rotate it
+#  Draws a 3D polyhedron and allows the user to rotate it
 #  (mouse left button and wheel).
 #
-#  The Tetrahedron is represented by a 3 x 4 matrix. 
-#  Each column represents a 3D vertex.
+#  Each polyhedron is represented by an array of lists,
+#   and each list represents a 3d vertex. 
 #
 #  note: a m x n matrix is represented by a list of lines:
 #     [[l_1] [l_2] .. [l_m]].
 #  m = len(mat), n = len(mat[0]), mat(i,j) = mat[i][j]
 #
+#  To change the polyhedron, use the left/right arrow keys on the keyboard.
+#
 #  @author Guilherme Avelino
-#  @since 28
-#  @see http://www.orimosenzon.com/wiki/index.php/Python_samples
-#  @see http://mathworld.wolfram.com/RotationMatrix.html
+#  @since 28/08/2019
 
 
 import numpy as np
@@ -27,12 +27,12 @@ except ImportError:
    from Tkinter import *     # python 2
 from math import *
 
-def createZeroMat(m,n):
+def create_zero_mat(m,n):
     """Return a matrix (m x n) filled with zeros."""
 
     return np.zeros((m,n))
 
-def matMul(mat1, mat2):
+def mat_mul(mat1, mat2):
     """Return mat1 x mat2 (mat1 multiplied by mat2)."""
 
     return mat1@mat2
@@ -52,87 +52,150 @@ def translate(v,dx,dy):
 
 def hom(m):
     """Homogenous coordinates for vector m."""
+
     return np.array([m[0],m[1],1.]) 
 
 def truncate(m):
     """Projects vector m to the (x,y,0) plane."""
+
     return np.array([m[0],m[1]])
 
+def scale(m, s):
+    """Scale vector m by scale s."""
+
+    scale_matrix = np.array([[s, 0., 0.],
+                             [0., s, 0.],
+                             [0., 0., s]])
+
+    return scale_matrix@m
+
+def normalize(v):
+    "Normalizes vector v."
+    return v/np.linalg.norm(v)
+
 def is_visible(v):
-    
+    "Maps a point from window to viewport coordinates."
+
     return v[2] > 0
 
-def drawTet(tet,col):
-    """Draw a tetrahedron."""
+def window_viewport(v,factor,dx,dy):
+    "Maps a point from window to viewport coordinates."
+
+    return truncate(translate(hom(scale(v, factor)), dx, dy))
+
+def draw_poly(p):
+    """Draws a polyhedron."""
+
+    canvas.delete(ALL) # delete all edges
+
+    p_coords, p_faces, p_faces_col = p[0], p[1], p[2]
 
     w = canvas.winfo_width()/2
     h = canvas.winfo_height()/2
-    canvas.delete(ALL) # delete all edges
-    nv = len(tet)   # number of vertices in tet (4)
+    nf = len(p_faces)
+    nv = len(p_coords)
+    factor = 100
 
-    # draw the 6 edges of the tetrahedron
-    for p1 in range(nv):
-        for p2 in range(p1+1,nv):
-            
-            canvas.create_line(tuple(truncate(translate(hom(tet[p1]), w, h))),
-                               tuple(truncate(translate(hom(tet[p2]), w, h))), fill = col)
-
-
-    nf = len(tet_faces)
+    poly_centr = sum(p_coords)/nv
 
     #drawing normal vectors and filling faces
     for i in range(nf):
-        f = tet_faces[i]
 
-        p1 = tet[f[0]]
-        p2 = tet[f[1]]
-        p3 = tet[f[2]]
+        f = p_faces[i]
 
-        centr = (p1 + p2 + p3)/3
+        f_points = [ p_coords[f[i]] for i in range(len(f)) ]
+
+        p1 = f_points[0]
+        p2 = f_points[1]
+        p3 = f_points[2]
+
+        f_centr = sum(f_points)/len(f_points)
         
+        dif = poly_centr-f_centr
+        dif_t = window_viewport(normalize(dif), factor, w, h)
+
         v1 = p2 - p1
         v2 = p3 - p1
 
         perp = np.cross(v1,v2)
-        perp = perp / np.linalg.norm(perp)
+        perp = normalize(perp)
+
+        # setting the perp vector orientation to be the same for all faces
+        perp = perp if perp@dif < 0 else -perp
 
         if(is_visible(perp)):
-
-            p1_t = truncate(translate(hom(p1), w, h))
-            p2_t = truncate(translate(hom(p2), w, h))
-            p3_t = truncate(translate(hom(p3), w, h))
-            centr_t = truncate(translate(hom(centr), w, h))
-            norm_t = truncate(translate(hom(centr + 100*perp), w, h))
-
-            canvas.create_line(tuple(centr_t),
-                               tuple(norm_t), fill = "black", arrow = LAST)
-            #print("{x} are visible".format(x = perp))
-
-            polygon_points = [tuple(p1_t),tuple(p2_t),tuple(p3_t),tuple(p1_t)]
-
-            if(faces_col[i] == ""):
-                faces_col[i] = random.choice(COLORS) 
             
-            canvas.create_polygon(polygon_points,fill = faces_col[i], outline = "black", width = 2)
-        else:
-            if(faces_col[i] != ""):
-                faces_col[i] = ""
-            
-            #print(perp)
+            f_points_t = [ window_viewport(p, factor, w, h) for p in f_points ]
+            a = window_viewport(f_centr, factor, w, h)
+            b = window_viewport(f_centr + 0.75*perp, factor, w, h)
 
-    #print()  
+            # drawing normal vector
+            canvas.create_line(tuple(a), tuple(b), fill = "black", arrow = LAST)
+
+            polygon_points = [tuple(fpt) for fpt in f_points_t]
+            polygon_points.append(tuple(f_points_t[0]))
+            
+            canvas.create_polygon(polygon_points,fill = p_faces_col[i], outline = "black", width = 2)
+            
+def init_poly():
+    """Initialize polyhedra as a global variable."""
+
+    gr = (1.0 + sqrt(5))/2.0
+
+    #Tetrahedron
+    tet_points = np.array([[0,-1,0],[-1,1,0],[1,1,0],[0,0,2]])
+    tet_faces = np.array([[0,1,2],[0,2,3],[0,3,1],[2,1,3]])
+    tet_faces_col = random.choices(COLORS, k = len(tet_faces))
+
+    #Hexahedron or Cube
+    cube_points = np.array([[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1],
+                        [-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1]])
+    cube_faces = np.array([[0,1,2,3],[4,0,1,5],[1,2,6,5],[0,3,7,4],[4,5,6,7],[2,3,7,6]])
+    cube_faces_col = random.choices(COLORS, k = len(cube_faces))
+
+    #Octahedron
+    oct_points = np.array([[-1,0,0],[0,0,-1],[1,0,0],[0,0,1],[0,1,0],[0,-1,0]])
+    oct_faces = np.array([[0,1,4],[0,3,4],[2,3,4],[1,2,4],[0,1,5],[0,3,5],[2,3,5],[1,2,5]])
+    oct_faces_col = random.choices(COLORS, k = len(oct_faces))
+
+    #Dodecahedron
+    dod_points = np.array([[1,1,1], [1,1,-1], [1,-1,1], [1,-1,-1],
+                            [-1,1,1], [-1,1,-1], [-1,-1,1], [-1,-1,-1],
+                            [0,1.0/gr,gr], [0,-1.0/gr,gr], [0,-1.0/gr,-gr], [0,1.0/gr,-gr],
+                            [1.0/gr,gr,0], [-1.0/gr,gr,0], [-1.0/gr,-gr,0], [1.0/gr,-gr,0],
+                            [gr,0,1.0/gr], [-gr,0,1.0/gr], [-gr,0,-1.0/gr], [gr,0,-1.0/gr]])
+    dod_faces = np.array([[0,16,2,9,8],[8,4,13,12,0],[4,17,6,9,8],[9,6,14,15,2],
+                         [2,16,19,3,15],[0,12,1,19,16],[12,13,5,11,1],[4,17,18,5,13],
+                            [17,18,7,14,6],[14,7,10,3,15],[5,18,7,10,11],[3,19,1,11,10]])
+    dod_faces_col = random.choices(COLORS, k = len(dod_faces))
+
+    #Icosahedron
+    ico_points = np.array([[1,0,gr],[1,0,-gr],[-1,0,gr],[-1,0,-gr],
+                            [0,gr,1],[0,-gr,1],[0,-gr,-1],[0,gr,-1],
+                            [gr,1,0],[gr,-1,0],[-gr,1,0],[-gr,-1,0]])
+    ico_faces = np.array([[2,4,0],[2,0,5],[4,0,8],[0,8,9],[0,9,5],
+                            [6,5,11],[6,5,9],[6,9,1],[6,1,3],[6,3,11],
+                            [1,9,8],[8,1,7],[7,1,3],[3,7,10],[10,3,11],
+                            [11,10,2],[2,11,5],[10,2,4],[10,7,4],[7,8,4]])
+    ico_faces_col = random.choices(COLORS, k = len(ico_faces))
+
+    global polys
+    polys = [[tet_points, tet_faces, tet_faces_col],
+            [cube_points, cube_faces, cube_faces_col],
+            [oct_points, oct_faces, oct_faces_col],
+            [dod_points, dod_faces, dod_faces_col],
+            [ico_points, ico_faces, ico_faces_col]]
 
 def init():
     """Initialize global variables."""
 
     global ROT_X, ROT_Y, ROT_Z
-    global eps, EPS, tet, tet_faces,faces_col
-    global lastX, lastY, tetColor, bgColor
+    global eps, EPS
+    global lastX, lastY, poly_color, bg_color
     global COLORS
+    global polys, poly_idx
 
-    tet = np.array([[0.,-100.,0.],[-100.,100.,0.],[100.,100.,0.],[0.,0.,200.]])
-    tet_faces = np.array([[0,1,2],[0,2,3],[0,3,1],[2,1,3]])
-    faces_col = [""]*len(tet_faces)
+    poly_idx = 0
     
     COLORS = ['snow', 'ghost white', 'white smoke', 'gainsboro', 'floral white', 'old lace',
     'linen', 'antique white', 'papaya whip', 'blanched almond', 'bisque', 'peach puff',
@@ -225,10 +288,12 @@ def init():
 
     lastX = 0 
     lastY = 0
-    tetColor = 'red'
-    bgColor = 'white'
+    poly_color = 'red'
+    bg_color = 'white'
 
-def cbClicked(event):
+    init_poly()
+
+def cb_clicked(event):
     """Save current mouse position."""
 
     global lastX, lastY
@@ -236,76 +301,113 @@ def cbClicked(event):
     lastX = event.x
     lastY = event.y
 
-def cbMottion(event):
+def cb_mottion(event):
     """Map mouse displacements in Y direction to rotations about X axis,
        and mouse displacements in X direction to rotations about Y axis.""" 
 
-    global tet
+    global polys
+    p = polys[poly_idx]
 
     # Y coordinate is upside down
     dx = lastY - event.y 
-    tet = matMul(tet,ROT_X(EPS(-dx)))
+    #print(p)
+    p[0] = mat_mul(p[0], ROT_X(EPS(-dx)))
 
     dy = lastX - event.x
-    tet = matMul(tet,ROT_Y(EPS(dy)))
+    p[0] = mat_mul(p[0], ROT_Y(EPS(dy)))
 
-    drawTet(tet,tetColor)
-    cbClicked(event)   
+    draw_poly(p)
+    cb_clicked(event)   
 
-def wheelUp(event):
+def wheel_up(event):
    # print("scroll pra cima")
     """Map mouse wheel up displacements to rotations about Z axis."""
 
-    global tet
-    tet = matMul(tet,ROT_Z(EPS(10)))
-    drawTet(tet,tetColor)
+    global polys
+    p = polys[poly_idx]
 
-def wheelDown(event):
+    p[0] = mat_mul(p[0], ROT_Z(EPS(10)))
+    draw_poly(p)
+
+def wheel_down(event):
     #print("scroll pra baixo")
     """Map mouse wheel down displacements to rotations about Z axis."""
 
-    global tet
-    tet = matMul(tet,ROT_Z(EPS(-10)))
-    drawTet(tet,tetColor)
+    global polys
+    p = polys[poly_idx]
+
+    p[0] = mat_mul(p[0], ROT_Z(EPS(-10)))
+    draw_poly(p)
 
 def wheel(event):
     #print("scroll")
     """Map mouse wheel displacements to rotations about Z axis."""
 
-    global tet
-    tet = matMul(tet,ROT_Z(EPS(event.delta/120)))
-    drawTet(tet,tetColor)
+    global polys
+    p = polys[poly_idx]
+
+    p[0] = mat_mul(p[0], ROT_Z(EPS(event.delta/120)))
+    draw_poly(p)
 
 def resize(event):
     """Redraw the tetrahedron, in case of a window change due to user resizing it.""" 
+    global polys
+    p = polys[poly_idx]
 
-    drawTet(tet,tetColor)
-                
+    draw_poly(p)
+
+def right_arrow(event):
+    """Changes the polyedron to be displayed."""
+    global polys,poly_idx
+    
+    poly_idx = (poly_idx + 1)%len(polys)
+    
+    p = polys[poly_idx]
+
+    draw_poly(p)
+
+def left_arrow(event):
+    """Changes the polyedron to be displayed."""
+    global polys,poly_idx
+
+    poly_idx = (poly_idx - 1)%len(polys)
+
+    p = polys[poly_idx]
+
+    draw_poly(p)
+    
+
 def main():
     global canvas
     root = Tk()
-    root.title('Tetrahedron')
+    root.title('Platonic Solids')
     root.geometry('+0+0')
 
     init()
 
-    canvas = Canvas(root, width=400, height=400, background=bgColor)
+    canvas = Canvas(root, width=400, height=400, background=bg_color)
     canvas.pack(fill=BOTH,expand=YES)               
-    canvas.bind("<Button-1>", cbClicked)
-    canvas.bind("<B1-Motion>", cbMottion)
+    canvas.bind("<Button-1>", cb_clicked)
+    canvas.bind("<B1-Motion>", cb_mottion)
     canvas.bind("<Configure>", resize)
+    canvas.bind("<Left>", left_arrow)
+    canvas.bind("<Right>", right_arrow)
 
     from platform import uname
     os = uname()[0]
     if ( os == "Linux" ):
-         canvas.bind('<Button-4>', wheelUp)      # X11
-         canvas.bind('<Button-5>', wheelDown)
+         canvas.bind('<Button-4>', wheel_up)      # X11
+         canvas.bind('<Button-5>', wheel_down)
     elif ( os == "Darwin" ):
          canvas.bind('<MouseWheel>', wheel)      # MacOS
     else: 
          canvas.bind_all('<MouseWheel>', wheel)  # windows
 
-    drawTet(tet,tetColor)
+    canvas.focus_set()
+
+    p = polys[poly_idx]
+
+    draw_poly(p)
 
     mainloop()
 
