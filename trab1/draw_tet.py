@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # coding: UTF-8
 #
-## @package _12_tet
-#
 #  Draws a 3D polyhedron and allows the user to rotate it
 #  (mouse left button and wheel).
 #
@@ -12,8 +10,10 @@
 #  note: a m x n matrix is represented by a list of lines:
 #     [[l_1] [l_2] .. [l_m]].
 #  m = len(mat), n = len(mat[0]), mat(i,j) = mat[i][j]
+#  
+#  Intsructions for use:
 #
-#  To change the polyhedron, use the left/right arrow keys on the keyboard.
+#  1)   To change the polyhedron, use the left/right arrow keys on the keyboard.
 #
 #  @author Guilherme Avelino
 #  @since 28/08/2019
@@ -42,46 +42,60 @@ def matTrans(mat):
 
     return np.transpose(mat)
 
-def translate(v,dx,dy):
-    """Translate vector(x,y) by (dx,dy)."""
+def translate(v, dx = 0, dy = 0, dz = 0):
+    """Translate vector(x,y,z) by (dx,dy,dz)."""
 
-    #matriz de translação em coordenadas homogeneas
-    transl_matrix = np.array([[1.,0.,dx],[0.,1.,dy],[0.,0.,1.]])
+    transl_matrix = np.array([[1., 0., 0., float(dx)],
+                              [0., 1., 0., float(dy)],
+                              [0.,0.,1., float(dz)],
+                              [0., 0., 0., 1.]])
+    v = transl_matrix@v
+    v = v/v[-1]
 
-    return transl_matrix@v
+    return v
 
 def hom(m):
     """Homogenous coordinates for vector m."""
 
-    return np.array([m[0],m[1],1.]) 
+    return np.array([float(m[0]), float(m[1]), float(m[2]), 1.]) 
 
 def truncate(m):
     """Projects vector m to the (x,y,0) plane."""
 
     return np.array([m[0],m[1]])
 
-def scale(m, s):
+def scale(m, fx = 1., fy = 1., fz = 1.):
     """Scale vector m by scale s."""
 
-    scale_matrix = np.array([[s, 0., 0.],
-                             [0., s, 0.],
-                             [0., 0., s]])
+    scale_matrix = np.array([[float(fx), 0., 0., 0.],
+                             [0., float(fy), 0., 0.],
+                             [0., 0., float(fz), 0.],
+                             [0., 0., 0., 1.]])
 
     return scale_matrix@m
 
 def normalize(v):
     "Normalizes vector v."
+
     return v/np.linalg.norm(v)
 
 def is_visible(v):
-    "Maps a point from window to viewport coordinates."
+    "Return True if a face is visible to the user."
 
     return v[2] > 0
 
-def window_viewport(v,factor,dx,dy):
+def window_viewport(v, factor = (1., 1., 1.), t = (0., 0., 0.), ti = (0., 0., 0.)):
     "Maps a point from window to viewport coordinates."
+    
+    v = hom(v)
+    v = translate(v, dx = t[0], dy = t[1], dz = t[2])  # translate to the origin
+    
+    #Applying severous transformations in homogeneous coordinates
+    v = scale(v, fx = factor[0], fy = factor[1], fz = factor[2])
 
-    return truncate(translate(hom(scale(v, factor)), dx, dy))
+    v = translate(v, dx = ti[0] , dy = ti[1], dz = t[2]) # translate back to window center
+       
+    return truncate(v)
 
 def draw_poly(p):
     """Draws a polyhedron."""
@@ -89,14 +103,23 @@ def draw_poly(p):
     canvas.delete(ALL) # delete all edges
 
     p_coords, p_faces, p_faces_col = p[0], p[1], p[2]
-
+    
     w = canvas.winfo_width()/2
     h = canvas.winfo_height()/2
     nf = len(p_faces)
     nv = len(p_coords)
-    factor = 100
+    factor = (100., 100., 1.)
 
     poly_centr = sum(p_coords)/nv
+
+    #Defining translation parameters
+    t = (-poly_centr[0], -poly_centr[1], -poly_centr[2]) #to the origin
+    t_inv = (w - poly_centr[0], h - poly_centr[1], -poly_centr[2]) #to the middle of the window
+
+    poly_centr_vp = window_viewport(poly_centr, factor = factor, t = t, ti = t_inv)
+    
+    #Filling centroid on the screen
+    #canvas.create_oval(poly_centr_vp[0]-1,poly_centr_vp[1]-5,poly_centr_vp[0]+5,poly_centr_vp[1]+1, fill = "red")
 
     #drawing normal vectors and filling faces
     for i in range(nf):
@@ -112,7 +135,7 @@ def draw_poly(p):
         f_centr = sum(f_points)/len(f_points)
         
         dif = poly_centr-f_centr
-        dif_t = window_viewport(normalize(dif), factor, w, h)
+        dif_t = window_viewport(normalize(dif), factor, t = t, ti = t_inv)
 
         v1 = p2 - p1
         v2 = p3 - p1
@@ -125,9 +148,9 @@ def draw_poly(p):
 
         if(is_visible(perp)):
             
-            f_points_t = [ window_viewport(p, factor, w, h) for p in f_points ]
-            a = window_viewport(f_centr, factor, w, h)
-            b = window_viewport(f_centr + 0.75*perp, factor, w, h)
+            f_points_t = [ window_viewport(p, factor = factor, t = t, ti = t_inv) for p in f_points ]
+            a = window_viewport(f_centr, factor = factor, t = t, ti = t_inv)
+            b = window_viewport(f_centr + 0.75*perp, factor,t = t, ti = t_inv)
 
             # drawing normal vector
             canvas.create_line(tuple(a), tuple(b), fill = "black", arrow = LAST)
@@ -136,7 +159,7 @@ def draw_poly(p):
             polygon_points.append(tuple(f_points_t[0]))
             
             canvas.create_polygon(polygon_points,fill = p_faces_col[i], outline = "black", width = 2)
-            
+               
 def init_poly():
     """Initialize polyhedra as a global variable."""
 
@@ -194,8 +217,6 @@ def init():
     global lastX, lastY, poly_color, bg_color
     global COLORS
     global polys, poly_idx
-
-    poly_idx = 0
     
     COLORS = ['snow', 'ghost white', 'white smoke', 'gainsboro', 'floral white', 'old lace',
     'linen', 'antique white', 'papaya whip', 'blanched almond', 'bisque', 'peach puff',
@@ -292,6 +313,8 @@ def init():
     bg_color = 'white'
 
     init_poly()
+    poly_idx = random.randint(0, len(polys) - 1)
+
 
 def cb_clicked(event):
     """Save current mouse position."""
