@@ -108,7 +108,9 @@ def draw_poly(p):
     h = canvas.winfo_height()/2
     nf = len(p_faces)
     nv = len(p_coords)
-    factor = (100., 100., 1.)
+
+    s = min(canvas.winfo_width(), canvas.winfo_height())
+    factor = (s/4., s/4., 1.)
 
     poly_centr = sum(p_coords)/nv
 
