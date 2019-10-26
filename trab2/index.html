@@ -9,23 +9,43 @@
     <link rel="stylesheet" href="css/index.css">
 
     <title>Curvas de Bézier</title>
+
+    <!--Tem que ser carregado aqui-->
+    <script type="text/javascript" src="js/tinygl.js"></script>
+
 </head>
 <body>
     <div class="container-fluid">
         <div class="row">
-            <div class="col-xs">
-                <button class="btn btn-lg" id="bezier-button" onclick="drawBezier()"> Bézier </button>
+
+            <div class="col">
+                <button class="btn btn-lg" id="bezier-button" onclick="onBezierClick()"> Bézier </button>
             </div>
-            <div class="col-xs">
-                <button class="btn btn-lg" id="hermite-button" onclick="drawHermite()"> Hermite </button>
+            <div class="col">
+                <button class="btn btn-lg" id="hermite-button" onclick="onHermiteClick()"> Hermite </button>
             </div>
-            <div class="col-xs">
-                <button class="btn btn-lg" id="splines-button" onclick="drawSplines()"> Splines </button>
+            <div class="col">
+                <button class="btn btn-lg" id="splines-button" onclick="onSplinesClick()"> Splines </button>
             </div>
-            <div class="col-xs">
-                <button class="btn btn-lg" id="catmullrom-button" onclick="drawCatmullRom()"> Catmull-Rom </button>
+            <div class="col">
+                <button class="btn btn-lg" id="catmullrom-button" onclick="onCatmullRomClick()"> Catmull-Rom </button>
             </div>
             
+        </div>
+
+        <div class="row instructions" id="instructions" style="display: none;">
+
+            <div class="col-5">
+                <p id="nome-curva">Desenhando curvas de Bézier</p> 
+            </div>
+
+            <div class="col-5">
+                <p> Escolha os pontos de controle com o mouse, e depois clique em OK.</p>
+            </div>
+
+            <div class="col-2">
+                <button class="btn btn-lg btn-primary" onclick="onOKButtonClick()">OK</button>
+            </div>
         </div>
 
         <div class="row">
@@ -33,9 +53,9 @@
         </div>
     </div>
 
-    
 </body>
 
-<script src="index.js"></script>
-<script src="js/bootstrap.min.js"></script>
+<script type="text/javascript" src="index.js"></script>
+<script type="text/javascript" src="js/bootstrap.min.js"></script>
+
 </html>
