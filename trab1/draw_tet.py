@@ -97,6 +97,9 @@ def window_viewport(v, factor = (1., 1., 1.), t = (0., 0., 0.), ti = (0., 0., 0.
        
     return truncate(v)
 
+def draw_poly_centr(poly_coords):
+    pass
+
 def draw_poly(p):
     """Draws a polyhedron."""
 
@@ -109,8 +112,8 @@ def draw_poly(p):
     nf = len(p_faces)
     nv = len(p_coords)
 
-    s = min(canvas.winfo_width(), canvas.winfo_height())
-    factor = (s/4., s/4., 1.)
+    s = min(w,h)
+    factor = (s/2., s/2., 1.)
 
     poly_centr = sum(p_coords)/nv
 
@@ -121,7 +124,7 @@ def draw_poly(p):
     poly_centr_vp = window_viewport(poly_centr, factor = factor, t = t, ti = t_inv)
     
     #Filling centroid on the screen
-    #canvas.create_oval(poly_centr_vp[0]-1,poly_centr_vp[1]-5,poly_centr_vp[0]+5,poly_centr_vp[1]+1, fill = "red")
+    canvas.create_oval(poly_centr_vp[0]-1,poly_centr_vp[1]-5,poly_centr_vp[0]+5,poly_centr_vp[1]+1, fill = "red")
 
     #drawing normal vectors and filling faces
     for i in range(nf):
@@ -168,7 +171,7 @@ def init_poly():
     gr = (1.0 + sqrt(5))/2.0
 
     #Tetrahedron
-    tet_points = np.array([[0,-1,0],[-1,1,0],[1,1,0],[0,0,2]])
+    tet_points = np.array([[0.,-1.,0.],[-1.,1.,0.],[1.,1.,0.],[0.,0.,2.]])
     tet_faces = np.array([[0,1,2],[0,2,3],[0,3,1],[2,1,3]])
     tet_faces_col = random.choices(COLORS, k = len(tet_faces))
 
@@ -345,7 +348,6 @@ def cb_mottion(event):
     cb_clicked(event)   
 
 def wheel_up(event):
-   # print("scroll pra cima")
     """Map mouse wheel up displacements to rotations about Z axis."""
 
     global polys
@@ -355,7 +357,6 @@ def wheel_up(event):
     draw_poly(p)
 
 def wheel_down(event):
-    #print("scroll pra baixo")
     """Map mouse wheel down displacements to rotations about Z axis."""
 
     global polys
@@ -400,7 +401,6 @@ def left_arrow(event):
     p = polys[poly_idx]
 
     draw_poly(p)
-    
 
 def main():
     global canvas
@@ -417,6 +417,7 @@ def main():
     canvas.bind("<Configure>", resize)
     canvas.bind("<Left>", left_arrow)
     canvas.bind("<Right>", right_arrow)
+    canvas.bind("<c>", apertou_c)
 
     from platform import uname
     os = uname()[0]

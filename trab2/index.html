@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/index.css">
+
+    <title>Curvas de Bézier</title>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-xs">
+                <button class="btn btn-lg" id="bezier-button" onclick="drawBezier()"> Bézier </button>
+            </div>
+            <div class="col-xs">
+                <button class="btn btn-lg" id="hermite-button" onclick="drawHermite()"> Hermite </button>
+            </div>
+            <div class="col-xs">
+                <button class="btn btn-lg" id="splines-button" onclick="drawSplines()"> Splines </button>
+            </div>
+            <div class="col-xs">
+                <button class="btn btn-lg" id="catmullrom-button" onclick="drawCatmullRom()"> Catmull-Rom </button>
+            </div>
+            
+        </div>
+
+        <div class="row">
+            <canvas id="glCanvas" class="glCanvas"></canvas>
+        </div>
+    </div>
+
+    
+</body>
+
+<script src="index.js"></script>
+<script src="js/bootstrap.min.js"></script>
+</html>
