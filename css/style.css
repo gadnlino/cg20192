@@ -1,0 +1,46 @@
+.top {
+    height: 10%;
+}
+
+.top2 {
+    padding-left: 4%;
+    height: 35%;
+}
+
+.bot {
+    height: 90%;
+}
+
+.bot2 {
+    height: 55%;
+}
+
+.left {
+    width: 10%;
+    height: 100%;
+    float: left;
+}
+
+.center{
+    display: inline-block;
+    width: 45%;
+    height: 100%;
+}
+
+.right {
+    display: inline-block;
+    width: 40%;
+    height: 100%;
+}
+
+#resetar{
+    background-color: darkred;
+    color: aliceblue;
+}
+
+html, body {
+    height: 100vh;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+}
