@@ -9,7 +9,9 @@ let it = 0, ft = 1;
 //https://www.freecodecamp.org/news/nerding-out-with-bezier-curves-6e3c0bc48e2f/
 function computeBezier(){
 
-    clearCurveVertices();
+    //clearCurveVertices();
+
+    let curveVertices = [];
 
     let n = selectedPoints.length;
     let ndim = selectedPoints[0].length;
@@ -26,6 +28,8 @@ function computeBezier(){
             bt = addVector(cp,bt);
         }
         
-        pushVertex(bt);
+        curveVertices.push(bt);
     }
+
+    pushCurve(curveVertices);
 }

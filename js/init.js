@@ -8,9 +8,10 @@ let camera;
 let scene;
 let selectedPoints;
 let pointLabels;
-let curveVertices;
+let curvesPoints;
 
 function init(){
+
     canvasElement = document.getElementById("threejs-canvas-div");
     menu = document.getElementById("menu");
     w = window.innerWidth - menu.clientWidth;
@@ -23,7 +24,6 @@ function init(){
     let loader = new THREE.FontLoader(manager);
     loader.load('https://threejs.org/examples/fonts/droid/droid_serif_bold.typeface.json', function(response) {
         font = response;
-        //console.log(response);
     });
 
     camera = new THREE.PerspectiveCamera( 45, w / h, 1, 500 );
@@ -34,20 +34,119 @@ function init(){
 
     selectedPoints = [];
     pointLabels = [];
-    curveVertices = [];
+    curvesPoints = [];
 }
 
 function clearScene(){
     
-    while(scene.children.length > 0){
-        scene.remove(scene.children[scene.children.length-1]);
+    if(selectedPoints.length > 0 || curvesPoints.length > 0){
+        
+        while(scene.children.length > 0){
+            scene.remove(scene.children[scene.children.length-1]);
+        }
+    
+        curvesPoints = [];
+        selectedPoints = [];
+        pointLabels = [];
+    
+        animate();
     }
+    else{
+        alert("Nenhum ponto foi escolhido e nenhuma curva foi traçada!");
+    }
+   
+}
 
-    curveVertices = [];
-    selectedPoints = [];
-    pointLabels = [];
+function popPoint(){
 
-    animate();
+    if(selectedPoints.length > 0){
+
+        const oldSelectedPoints = selectedPoints;
+        const oldCurvesPoints = curvesPoints;
+        const oldPointLabels = pointLabels;
+
+        clearScene();
+
+        selectedPoints = oldSelectedPoints;
+        selectedPoints.pop();
+
+        curvesPoints = oldCurvesPoints;
+        pointLabels = oldPointLabels;
+        pointLabels.pop();
+
+        animate();
+    }
+    else{
+        alert("Nenhum ponto foi selecionado!");
+    }
+}
+
+function popAllPoints(){
+
+    if(selectedPoints.length > 0){
+
+        const oldSelectedPoints = selectedPoints;
+        const oldCurvesPoints = curvesPoints;
+        const oldPointLabels = pointLabels;
+
+        clearScene();
+
+        selectedPoints = [];
+
+        curvesPoints = oldCurvesPoints;
+        pointLabels = oldPointLabels;
+        pointLabels.pop();
+
+        animate();
+    }
+    else{
+        alert("Nenhum ponto foi selecionado!");
+    }
+}
+
+function popCurve(){
+
+    if(curvesPoints.length > 0){
+
+        const oldSelectedPoints = selectedPoints;
+        const oldCurvesPoints = curvesPoints;
+        const oldPointLabels = pointLabels;
+
+        clearScene();
+
+        selectedPoints = oldSelectedPoints;
+        curvesPoints = oldCurvesPoints;
+        curvesPoints.pop();
+        pointLabels = oldPointLabels;
+        pointLabels.pop();
+
+        animate();
+    }
+    else{
+        alert("Nenhuma curva foi traçada!");
+    }
+}
+
+function popAllCurves(){
+
+    if(curvesPoints.length > 0){
+
+        const oldSelectedPoints = selectedPoints;
+        const oldCurvesPoints = curvesPoints;
+        const oldPointLabels = pointLabels;
+
+        clearScene();
+
+        selectedPoints = oldSelectedPoints;
+        curvesPoints = [];
+        pointLabels = oldPointLabels;
+        pointLabels.pop();
+
+        animate();
+    }
+    else{
+        alert("Nenhuma curva foi traçada!");
+    }
 }
 
 function pushPoint(point){
@@ -67,16 +166,13 @@ function pushPointLabel([x,y,z], label){
     });
 }
 
-function pushVertex(vertex){
-    curveVertices.push(vertex);
+function pushCurve(curveVertices){
+    curvesPoints.push(curveVertices);
+    animate();
 }
 
 function hasVertex(){
     return curveVertices.length > 0;
-}
-
-function clearCurveVertices(){
-    curveVertices = [];
 }
 
 function drawPoints(){
@@ -95,19 +191,26 @@ function drawPoints(){
     renderer.render( scene, camera );
 }
 
-function drawLines(){
-    let geometry = new THREE.Geometry();
-    let material = new THREE.LineBasicMaterial( { color: 0xffffff } );
+function drawCurves(){
 
-    for(let i = 0;i < curveVertices.length;i++){
+    for(let i = 0;i < curvesPoints.length;i++){
 
-        let point = curveVertices[i];
-        geometry.vertices.push(new THREE.Vector3( point[0], point[1], point[2]) );
-        
+        let geometry = new THREE.Geometry();
+        let material = new THREE.LineBasicMaterial( { color: 0xffffff } );
+
+        const curve = curvesPoints[i];
+
+        for(let j = 0;j < curve.length;j++){
+            
+            const point = curve[j];
+            geometry.vertices.push(new THREE.Vector3( point[0], point[1], point[2]) );
+        }
+
+        let line = new THREE.Line( geometry, material );
+        scene.add( line );
     }
 
-    let line = new THREE.Line( geometry, material );
-    scene.add( line );
+    
     renderer.render( scene, camera );
 }
 
@@ -149,13 +252,14 @@ function drawPointLabels(){
 }
 
 function animate(){
-    
+
     drawPoints();
-    drawPointLabels();
-    drawLines();
+    drawCurves();
+    //drawPointLabels();
 }
 
 function onWindowResize(){
+
     let w = window.innerWidth - menu.clientWidth;
     let h = canvasElement.clientHeight;
     camera.aspect = w/ h;

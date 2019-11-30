@@ -1,7 +1,7 @@
-import {drawCubicSplines} from './cubicSplines.js';
-import {drawBezier} from './bezier.js';
-import {drawCatmullRomSplines} from './catmullRomSplines.js';
-import {drawHermite} from './hermite.js';
+import {drawCubicSplines} from './curves/cubicSplines.js';
+import {drawBezier} from './curves/bezier.js';
+import {drawCatmullRomSplines} from './curves/catmullRomSplines.js';
+import {drawHermite} from './curves/hermite.js';
 
 let buttonBezier = document.getElementById('bezier');
 let buttonSplinesCubicas = document.getElementById('splines-cubicas');

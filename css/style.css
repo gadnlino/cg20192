@@ -4,7 +4,7 @@
 
 .top2 {
     padding-left: 4%;
-    height: 35%;
+    height: 25%;
 }
 
 .bot {
@@ -12,7 +12,7 @@
 }
 
 .bot2 {
-    height: 55%;
+    height: 35%;
 }
 
 .left {
@@ -33,7 +33,7 @@
     height: 100%;
 }
 
-#resetar{
+.botao-resetar{
     background-color: darkred;
     color: aliceblue;
 }
@@ -41,6 +41,4 @@
 html, body {
     height: 100vh;
     width: 100%;
-    padding: 0;
-    margin: 0;
 }

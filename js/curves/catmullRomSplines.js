@@ -8,11 +8,12 @@ let alpha = 1;
 let dx = 1/1e2;
 let it = 0, ft = 1;
 
+//Extraído de 
+//https://qroph.github.io/2018/07/30/smooth-paths-using-catmull-rom-splines.html
 function computeCatmullRomSplines(){
-    //Extraído de 
-    //https://qroph.github.io/2018/07/30/smooth-paths-using-catmull-rom-splines.html
+    
 
-    clearCurveVertices();
+    let curveVertices = [];
 
     let n = selectedPoints.length;
 
@@ -48,7 +49,7 @@ function computeCatmullRomSplines(){
         const c = m1;
         const d = p1;
 
-        console.log(a,b,c,d);
+        //console.log(a,b,c,d);
 
         for(let t = it;t <= ft;t+=dx){
             
@@ -65,9 +66,11 @@ function computeCatmullRomSplines(){
 
             const point = math.multiply(m1, math.multiply(m2,m3));*/
 
-            pushVertex(point);
+            curveVertices.push(point);
         }
     }
 
-    console.log(curveVertices);
+    //console.log(curveVertices);
+
+    pushCurve(curveVertices);
 }

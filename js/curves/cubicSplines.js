@@ -12,7 +12,7 @@ let iu = 0, fu = 1;
 ////http://www2.cs.uregina.ca/~anima/408/Notes/Interpolation/UniformBSpline.htm
 function computeCubicSplines(){
 
-    clearCurveVertices();
+    let curveVertices = [];
 
     let n = selectedPoints.length;
 
@@ -31,7 +31,7 @@ function computeCubicSplines(){
 
             const r = math.multiply(1/6, math.multiply(m1, math.multiply(m2,m3)));
 
-            pushVertex(r);
+            curveVertices.push(r);
 
             //console.log(u);
         }
@@ -39,5 +39,6 @@ function computeCubicSplines(){
 
     //console.log(curveVertices[0], curveVertices[curveVertices.length-1]);
 
+    pushCurve(curveVertices);
 }
 

@@ -3,14 +3,14 @@ export function drawHermite(){
     animate();
 }
 
-let tightness = 0.87;
+let tightness = 0.0;
 let dt = 1/1e2;
 let it = 0, ft = 1;
 
 //https://www.cubic.org/docs/hermite.htm
 function computeHermite(){
 
-    clearCurveVertices();
+    let curveVertices = [];
 
     const n = selectedPoints.length;
     const ndim = selectedPoints[0].length;
@@ -50,7 +50,10 @@ function computeHermite(){
             const pa4 = multiplyVector(t1, h3);
 
             const point = addVector(pa1, addVector(pa2, addVector(pa3, pa4)));
-            pushVertex(point);
+            
+            curveVertices.push(point);
         }
     }
+
+    pushCurve(curveVertices);
 }
