@@ -3,7 +3,7 @@ export function drawHermite(){
     animate();
 }
 
-let tightness = 0.0;
+let tightness = 0.87;
 let dt = 1/1e2;
 let it = 0, ft = 1;
 

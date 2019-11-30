@@ -88,4 +88,18 @@ function vectorDistance(v1,v2){
     return Math.sqrt(dx*dx + dy*dy + dz*dz);
 }
 
+function sequence(from, to, delta){
+    if(from < to){
+        
+        let ret = [];
+
+        for(let i = from; i <= to;i+= delta){
+            ret.push(i);
+        }
+
+
+        return ret;
+    }
+}
+
 //export {addVector, subtractVector, multiplyVector, divideVector, factorial, binomial};

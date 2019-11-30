@@ -8,8 +8,9 @@ export function drawCubicSplines(){
 
 let du = 1/1e2;
 let iu = 0, fu = 1;
-
-////http://www2.cs.uregina.ca/~anima/408/Notes/Interpolation/UniformBSpline.htm
+let maxSteps = 100;
+//Extraido de
+//http://www2.cs.uregina.ca/~anima/408/Notes/Interpolation/UniformBSpline.htm
 function computeCubicSplines(){
 
     let curveVertices = [];
@@ -23,22 +24,30 @@ function computeCubicSplines(){
         const p2 = selectedPoints[i+2];
         const p3 = selectedPoints[i+3];
 
-        for(let u = iu;u <= fu;u += du){
+        for(let m = 0;m < maxSteps;m++){
 
+            const u = m/maxSteps;
             const m1 = [Math.pow(u,3),Math.pow(u,2),u,1];
             const m2 = [[-1, 3, -3, 1], [3, -6, 3, 4], [-3, 0, 3, 0], [1, 4, 1, 0]];
             const m3 = [p0,p1,p2,p3];
 
             const r = math.multiply(1/6, math.multiply(m1, math.multiply(m2,m3)));
-
-            curveVertices.push(r);
-
-            //console.log(u);
+            console.log()
+            curveVertices.push(r);            
         }
     }
 
-    //console.log(curveVertices[0], curveVertices[curveVertices.length-1]);
-
     pushCurve(curveVertices);
 }
+
+const d = 3;
+
+/* function computeCubicSplines(){
+    let curveVertices = [];
+
+    let m = selectedPoints.length;
+
+    let u = sequence(0, n , 1);
+
+} */
 

@@ -2,13 +2,19 @@ let canvasElement;
 let menu;
 let w;
 let h;
+let aspectRatio;
+let viewSize;
 let font;
 let renderer;
 let camera;
 let scene;
+let manager;
+let loader;
 let selectedPoints;
 let pointLabels;
 let curvesPoints;
+
+const mode = "2D";
 
 function init(){
 
@@ -16,18 +22,22 @@ function init(){
     menu = document.getElementById("menu");
     w = window.innerWidth - menu.clientWidth;
     h = canvasElement.clientHeight;
+
     renderer = new THREE.WebGLRenderer({antialias: true});
     renderer.setSize( w, h );
     canvasElement.appendChild(renderer.domElement);
     
-    let manager = new THREE.LoadingManager();
-    let loader = new THREE.FontLoader(manager);
+    manager = new THREE.LoadingManager();
+    loader = new THREE.FontLoader(manager);
     loader.load('https://threejs.org/examples/fonts/droid/droid_serif_bold.typeface.json', function(response) {
         font = response;
     });
 
-    camera = new THREE.PerspectiveCamera( 45, w / h, 1, 500 );
-    camera.position.set( 0, 0, 100 );
+    viewSize = 1;
+    aspectRatio = w/h;
+
+    camera = new THREE.PerspectiveCamera( 45, w / h, 1, 100000);
+    camera.position.set( 0, 0, 200 );
     camera.lookAt( 0, 0, 0 );
 
     scene = new THREE.Scene();
@@ -171,10 +181,6 @@ function pushCurve(curveVertices){
     animate();
 }
 
-function hasVertex(){
-    return curveVertices.length > 0;
-}
-
 function drawPoints(){
 
     let geometry = new THREE.Geometry();
@@ -184,7 +190,7 @@ function drawPoints(){
         geometry.vertices.push(new THREE.Vector3( point[0], point[1], point[2]) );
     }
 
-    let dotMaterial = new THREE.PointsMaterial( { size: 2, sizeAttenuation: true } );
+    let dotMaterial = new THREE.PointsMaterial( { size: 0.1, sizeAttenuation: true } );
     let dots = new THREE.Points( geometry, dotMaterial );
 
     scene.add(dots);

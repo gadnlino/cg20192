@@ -4,43 +4,42 @@ let botaoLimparPontos = document.getElementById("limpar-pontos");
 let botaoLimparUltimaCurva = document.getElementById("limpar-ultima-curva");
 let botaoLimparCurvas = document.getElementById("limpar-curvas");
 let botaoLimparTudo = document.getElementById('limpar-tudo');
- 
+
+let mouse = new THREE.Vector3();
+
 canvasDiv.onclick = e => {
-    
-    const posX = e.clientX - canvasDiv.getBoundingClientRect().x;
-    const posY = e.clientY - canvasDiv.getBoundingClientRect().y;
 
     const canvasWidth = canvasDiv.getBoundingClientRect().width;
     const canvasHeight = canvasDiv.getBoundingClientRect().height;
+    const canvasLeft = canvasDiv.getBoundingClientRect().x;
+    const canvasTop = canvasDiv.getBoundingClientRect().y;
 
+    let posX = e.clientX - canvasLeft;
+    let posY = e.clientY - canvasTop;
+    let posZ = 0.5;
 
-    //TA ERRADO, CONSERTAR!!!!!
-    const posXRel = (posX - (canvasWidth/2))/8;
-    const posYRel = ((canvasHeight/2) - posY)/8;//excuse me, wtf??????
-    const posZRel = 0;
+    posX = (posX/canvasWidth)*2 - 1;
+    posY = -(posY/canvasHeight)*2 + 1;
 
-    pushPoint([posXRel, posYRel, posZRel]);
+    mouse.x = posX;
+    mouse.y = posY;
+    mouse.z = posZ;
+
+    mouse.unproject(camera);
+
+    const pos = [mouse.x, mouse.y, mouse.z];
+
+    pushPoint(pos);
     
     animate();
 };
 
-botaoLimparUltimoPonto.onclick = e => {
-    popPoint();
-}
+botaoLimparUltimoPonto.onclick = () => popPoint();
 
-botaoLimparPontos.onclick = e => {
-    popAllPoints();
-}
+botaoLimparPontos.onclick = () => popAllPoints();
 
-botaoLimparUltimaCurva.onclick = e => {
-    popCurve();
-}
+botaoLimparUltimaCurva.onclick = () => popCurve();
 
-botaoLimparCurvas.onclick = e => {
-    popAllCurves();
-}
+botaoLimparCurvas.onclick = () => popAllCurves();
 
-botaoLimparTudo.onclick = e => {
-        
-    clearScene();
-};
+botaoLimparTudo.onclick = () => clearScene();
