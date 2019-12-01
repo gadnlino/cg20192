@@ -12,7 +12,8 @@ let manager;
 let loader;
 let controlPoints;
 let controlPointsLabels;
-let curvesPoints;
+let curves;
+let raycaster;
 
 const programModes = {
     MOVING_POINTS : "MOVING_POINTS",
@@ -49,11 +50,80 @@ function init(){
 
     controlPoints = [];
     controlPointsLabels = [];
-    curvesPoints = [];
+    curves = [];
+
+    raycaster = new THREE.Raycaster();
+
+}
+
+function getCurves(){
+    return curves.slice();
+}
+
+function getCurve(i){
+
+    if(i < curvesSize()){
+        return curves[i];
+    }
+}
+
+function curvesSize(){
+    return curves.length;
+}
+
+function getControlPoints(){
+    return [...controlPoints];
+}
+
+function getControlPoint(i){
+
+    if(i < controlPointsSize()){
+        return controlPoints[i];
+    }
+}
+
+function setControlPoint(i, newPoint){
+
+    if(i < controlPointsSize()){
+        controlPoints[i] = newPoint;
+    }
+}
+
+function controlPointsSize(){
+    return controlPoints.length;
+}
+
+function getControlPointsLabels(){
+    return controlPointsLabels.slice();
+}
+
+function getProgramMode(){
+    return currProgramMode;
 }
 
 function setProgramMode(mode){
     currProgramMode = mode;
+}
+
+function getMousePosition(e){
+
+    let posX = e.clientX - canvasLeft;
+    let posY = e.clientY - canvasTop;
+    let posZ = 0.5;
+
+    let mouse = new THREE.Vector3();
+
+    mouse.x = (posX/canvasWidth)*2 - 1;
+    mouse.y = -(posY/canvasHeight)*2 + 1;
+    mouse.z = posZ;
+
+    mouse.unproject(camera);
+
+    return {
+        screen : [e.clientX, e.clientY, 0],
+        canvas : [posX, posY, posZ],
+        scene : [mouse.x, mouse.y, mouse.z]
+    };
 }
 
 function createTextLabel(){
@@ -96,33 +166,12 @@ function createTextLabel(){
     };
 };
 
-function clearScene(){
-    
-    if(controlPoints.length > 0 || curvesPoints.length > 0){
-        
-        while(scene.children.length > 0){
-            
-            scene.remove(scene.children[scene.children.length-1]);
-        }
-    
-        curvesPoints = [];
-        controlPoints = [];
-        popAllControlPointsLabels();
-    
-        animate();
-    }
-    else{
-        alert("Nenhum ponto foi escolhido e nenhuma curva foi traçada!");
-    }
-   
-}
-
 function popControlPoint(){
 
     if(controlPoints.length > 0){
 
         const oldcontrolPoints = controlPoints.slice();
-        const oldCurvesPoints = curvesPoints.slice();
+        const oldcurves = curves.slice();
         const oldControlPointsLabels = controlPointsLabels.slice(0,controlPointsLabels.length-1);
 
         clearScene();
@@ -130,7 +179,7 @@ function popControlPoint(){
         controlPoints = oldcontrolPoints;
         controlPoints.pop();
 
-        curvesPoints = oldCurvesPoints;
+        curves = oldcurves;
         controlPointsLabels = oldControlPointsLabels;
 
         animate();
@@ -145,16 +194,14 @@ function popAllControlPoints(){
     if(controlPoints.length > 0){
 
         const oldcontrolPoints = controlPoints.slice();
-        const oldCurvesPoints = curvesPoints.slice();
+        const oldcurves = curves.slice();
         const oldcontrolPointsLabels = controlPointsLabels.slice();
 
         clearScene();
 
         controlPoints = [];
-        curvesPoints = oldCurvesPoints;
+        curves = oldcurves;
         controlPointsLabels = [];
-
-        //popAllControlPointsLabels();
 
         animate();
     }
@@ -165,23 +212,23 @@ function popAllControlPoints(){
 
 function pushCurve(curveVertices){
 
-    curvesPoints.push(curveVertices);
+    curves.push(curveVertices);
     animate();
 }
 
 function popCurve(){
 
-    if(curvesPoints.length > 0){
+    if(curves.length > 0){
 
         const oldcontrolPoints = controlPoints.slice();
-        const oldCurvesPoints = curvesPoints.slice();
+        const oldcurves = curves.slice();
         const oldcontrolPointsLabels = controlPointsLabels.slice();
 
         clearScene();
 
         controlPoints = oldcontrolPoints;
-        curvesPoints = oldCurvesPoints;
-        curvesPoints.pop();
+        curves = oldcurves;
+        curves.pop();
         controlPointsLabels = oldcontrolPointsLabels;
 
         animate();
@@ -193,16 +240,16 @@ function popCurve(){
 
 function popAllCurves(){
 
-    if(curvesPoints.length > 0){
+    if(curves.length > 0){
 
         const oldcontrolPoints = controlPoints.slice();
-        const oldCurvesPoints = curvesPoints.slice();
+        const oldcurves = curves.slice();
         const oldcontrolPointsLabels = controlPointsLabels.slice();
 
         clearScene();
 
         controlPoints = oldcontrolPoints;
-        curvesPoints = [];
+        curves = [];
         controlPointsLabels = oldcontrolPointsLabels;
 
         animate();
@@ -214,7 +261,7 @@ function popAllCurves(){
 
 function pushControlPoint(point){
 
-    controlPoints.push(point.scene);
+    controlPoints.push(point);
 
     pushControlPointLabel(`p${controlPoints.length-1}`, point.screen);
 }
@@ -230,7 +277,20 @@ function pushControlPointLabel(labelText, [x,y,z]){
     labelElement.setPosition(x + offsetX, y + offsetY, z + offsetZ);
     labelElement.updatePosition();
 
-    //canvasContainer.appendChild(labelElement.element);
+    controlPointsLabels.push(labelElement);
+}
+
+function setControlPointLabel(i, labelText, [x,y,z]){
+
+    const offsetX = 2.3, offsetY = 2.3, offsetZ = 0;
+    let textMesh = new THREE.MeshPhongMaterial( { color: 0xffffff } );
+
+    let labelElement = createTextLabel();
+    labelElement.setHTML(labelText);
+    labelElement.setParent(canvasContainer);
+    labelElement.setPosition(x + offsetX, y + offsetY, z + offsetZ);
+    labelElement.updatePosition();
+
     controlPointsLabels.push(labelElement);
 }
 
@@ -253,7 +313,8 @@ function drawPoints(){
     let geometry = new THREE.Geometry();
 
     for(let i = 0;i < controlPoints.length;i++){
-        let point = controlPoints[i];
+        
+        let point = controlPoints[i].scene;
         geometry.vertices.push(new THREE.Vector3( point[0], point[1], point[2]) );
     }
 
@@ -266,16 +327,16 @@ function drawPoints(){
 
 function drawCurves(){
 
-    for(let i = 0;i < curvesPoints.length;i++){
+    for(let i = 0;i < curves.length;i++){
 
         let geometry = new THREE.Geometry();
         let material = new THREE.LineBasicMaterial( { color: 0xffffff } );
 
-        const curve = curvesPoints[i];
-
-        for(let j = 0;j < curve.length;j++){
+        const {type, points} = curves[i].points;
+        
+        for(let j = 0;j < points.length;j++){
             
-            const point = curve[j];
+            const point = points[j];
             geometry.vertices.push(new THREE.Vector3( point[0], point[1], point[2]) );
         }
 
@@ -283,7 +344,6 @@ function drawCurves(){
         scene.add( line );
     }
 
-    
     renderer.render( scene, camera );
 }
 
@@ -298,7 +358,7 @@ function drawControlPointsLabels(){
     renderer.render(scene, camera);
 }
 
-function moveControlPoints(mousePosition, delta){
+function getSelectedControlPoint(mousePosition, delta){
 
     if(controlPoints.length > 0){
         
@@ -309,7 +369,7 @@ function moveControlPoints(mousePosition, delta){
         for(let i = 0;i < controlPoints.length;i++){
             const point = controlPoints[i];
             
-            const distance = vectorDistance(point, mousePosition.scene);
+            const distance = vectorDistance(point.scene, mousePosition.scene);
             
             if(distance <= delta && distance <= currDistance){
                 currControlPoint = point; 
@@ -318,12 +378,31 @@ function moveControlPoints(mousePosition, delta){
             }
         }
 
-
-        //mover o ponto, o label, e retraçar as curvas!!!!
-        console.log(index);
+        return (currControlPoint === null ? null : {index, point : currControlPoint});
 
     }else{
-        alert("Nenhum ponto foi selecionado!");
+        alert("Nenhum ponto foi adicionado ao canvas!");
+    }
+
+}
+
+function clearScene(){
+    
+    if(controlPoints.length > 0 || curves.length > 0){
+        
+        while(scene.children.length > 0){
+            
+            scene.remove(scene.children[scene.children.length-1]);
+        }
+    
+        curves = [];
+        controlPoints = [];
+        popAllControlPointsLabels();
+    
+        animate();
+    }
+    else{
+        alert("Nenhum ponto foi escolhido e nenhuma curva foi traçada!");
     }
 }
 

@@ -7,17 +7,20 @@ let tightness = 0.87;
 let dt = 1/1e2;
 let it = 0, ft = 1;
 
+const curveType = "HERMITE";
+
 //https://www.cubic.org/docs/hermite.htm
 function computeHermite(){
 
     let curveVertices = [];
 
-    const n = controlPoints.length;
-    const ndim = controlPoints[0].length;
+    const n = controlPointsSize();
+    const ndim = getControlPoint(0).scene.length;
 
     for(let i = 0;i < n-1;i++){
-        const p0 = controlPoints[i];
-        const p1 = controlPoints[i+1];
+
+        const p0 = getControlPoint(i).scene;    
+        const p1 = getControlPoint(i+1).scene;
 
         let t0, t1;
         if(n === 2){
@@ -26,15 +29,15 @@ function computeHermite(){
         }
         else if(i === 0){
             t0 = zeros(ndim);
-            t1 = multiplyVector(subtractVector(controlPoints[i+2], p0), tightness);
+            t1 = multiplyVector(subtractVector(getControlPoint(i+2).scene, p0), tightness);
         }
         else if(i === n-2){
-            t0 = multiplyVector(subtractVector(p1, controlPoints[i-1]), tightness);
+            t0 = multiplyVector(subtractVector(p1, getControlPoint(i-1).scene), tightness);
             t1 = zeros(ndim);
         }
         else{
-            t0 = multiplyVector(subtractVector(p1, controlPoints[i-1]), tightness);
-            t1 = multiplyVector(subtractVector(controlPoints[i+2], p0), tightness);
+            t0 = multiplyVector(subtractVector(p1, getControlPoint(i-1).scene), tightness);
+            t1 = multiplyVector(subtractVector(getControlPoint(i+2).scene, p0), tightness);
         }
 
         for(let t = it;t <= ft;t+=dt){
@@ -55,5 +58,8 @@ function computeHermite(){
         }
     }
 
-    pushCurve(curveVertices);
+    pushCurve({
+        type : curveType,
+        points : curveVertices
+    });
 }

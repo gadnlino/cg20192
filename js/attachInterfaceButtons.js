@@ -3,55 +3,67 @@ import {drawBezier} from './curves/bezier.js';
 import {drawCatmullRomSplines} from './curves/catmullRomSplines.js';
 import {drawHermite} from './curves/hermite.js';
 
-let buttonBezier = document.getElementById('bezier');
-let buttonSplinesCubicas = document.getElementById('splines-cubicas');
-let buttonCatmullRom = document.getElementById('catmull-rom');
-let buttonHermite = document.getElementById('hermite');
+let buttonBezier = document.getElementById('BEZIER');
+let buttonSplinesCubicas = document.getElementById('CUBIC_SPLINE');
+let buttonCatmullRom = document.getElementById('CATMULL_ROM');
+let buttonHermite = document.getElementById('HERMITE');
+
+buttonBezier.onclick = e => switchCurveButton(e);
+
+buttonSplinesCubicas.onclick = e => switchCurveButton(e);
+
+buttonCatmullRom.onclick = e => switchCurveButton(e);
+
+buttonHermite.onclick = e => switchCurveButton(e);
 
 function makeAlert(msg){
     alert(msg);
 }
 
-buttonBezier.onclick = function(e){
-    console.log('bezier clickado');
+function switchCurveButton(e){
 
-    if(controlPoints.length < 2){
-        makeAlert('Selecione pelo menos 2 pontos');
-        return;
-    }
+    const id = e.target.id;
 
-    drawBezier();
-};
+    switch(id){
+        
+        case "BEZIER":
 
-buttonSplinesCubicas.onclick = function(e){
-    console.log('splines-cubicas clickado');
+            if(controlPointsSize() < 2){
+                makeAlert('Selecione pelo menos 2 pontos');
+                break;
+            }
 
-    if(controlPoints.length < 4){
-        makeAlert('Selecione pelo menos 4 pontos');
-        return;
-    }
+            drawBezier();
+            break;
+
+        case "CUBIC_SPLINE":
+
+            if(controlPointsSize() < 4){
+                makeAlert('Selecione pelo menos 4 pontos');
+                break;
+            }
+
+            drawCubicSplines();
+            break; 
+        
+        case "CATMULL_ROM":
+            
+            if(controlPointsSize() < 4){
+                makeAlert('Selecione pelo menos 4 pontos');
+                break;
+            }
+
+            drawCatmullRomSplines();
+            break;
+
+        case "HERMITE":
     
-    drawCubicSplines();
-};
-
-buttonCatmullRom.onclick = function(e){
-    console.log('catmull-rom clickado');
-
-    if(controlPoints.length < 4){
-        makeAlert('Selecione pelo menos 4 pontos');
-        return;
+                if(controlPointsSize() < 2){
+                    makeAlert('Selecione pelo menos 2 pontos');
+                    break;
+                }
+    
+                drawHermite();
+                break;
     }
-
-    drawCatmullRomSplines();
-};
-
-buttonHermite.onclick = function(e){
-    console.log('hermite clickado');
-
-    if(controlPoints.length < 2){
-        makeAlert('Selecione pelo menos 2 pontos');
-        return;
-    }
-
-    drawHermite();
-};
+}
