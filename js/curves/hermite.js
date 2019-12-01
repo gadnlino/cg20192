@@ -12,12 +12,12 @@ function computeHermite(){
 
     let curveVertices = [];
 
-    const n = selectedPoints.length;
-    const ndim = selectedPoints[0].length;
+    const n = controlPoints.length;
+    const ndim = controlPoints[0].length;
 
     for(let i = 0;i < n-1;i++){
-        const p0 = selectedPoints[i];
-        const p1 = selectedPoints[i+1];
+        const p0 = controlPoints[i];
+        const p1 = controlPoints[i+1];
 
         let t0, t1;
         if(n === 2){
@@ -26,15 +26,15 @@ function computeHermite(){
         }
         else if(i === 0){
             t0 = zeros(ndim);
-            t1 = multiplyVector(subtractVector(selectedPoints[i+2], p0), tightness);
+            t1 = multiplyVector(subtractVector(controlPoints[i+2], p0), tightness);
         }
         else if(i === n-2){
-            t0 = multiplyVector(subtractVector(p1, selectedPoints[i-1]), tightness);
+            t0 = multiplyVector(subtractVector(p1, controlPoints[i-1]), tightness);
             t1 = zeros(ndim);
         }
         else{
-            t0 = multiplyVector(subtractVector(p1, selectedPoints[i-1]), tightness);
-            t1 = multiplyVector(subtractVector(selectedPoints[i+2], p0), tightness);
+            t0 = multiplyVector(subtractVector(p1, controlPoints[i-1]), tightness);
+            t1 = multiplyVector(subtractVector(controlPoints[i+2], p0), tightness);
         }
 
         for(let t = it;t <= ft;t+=dt){

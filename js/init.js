@@ -10,11 +10,16 @@ let camera;
 let scene;
 let manager;
 let loader;
-let selectedPoints;
+let controlPoints;
 let controlPointsLabels;
 let curvesPoints;
 
-const mode = "2D";
+const programModes = {
+    MOVING_POINTS : "MOVING_POINTS",
+    STANDARD : "STANDARD"
+};
+
+let currProgramMode = programModes.STANDARD;
 
 function init(){
 
@@ -42,9 +47,13 @@ function init(){
 
     scene = new THREE.Scene();
 
-    selectedPoints = [];
+    controlPoints = [];
     controlPointsLabels = [];
     curvesPoints = [];
+}
+
+function setProgramMode(mode){
+    currProgramMode = mode;
 }
 
 function createTextLabel(){
@@ -89,7 +98,7 @@ function createTextLabel(){
 
 function clearScene(){
     
-    if(selectedPoints.length > 0 || curvesPoints.length > 0){
+    if(controlPoints.length > 0 || curvesPoints.length > 0){
         
         while(scene.children.length > 0){
             
@@ -97,7 +106,7 @@ function clearScene(){
         }
     
         curvesPoints = [];
-        selectedPoints = [];
+        controlPoints = [];
         popAllControlPointsLabels();
     
         animate();
@@ -110,21 +119,19 @@ function clearScene(){
 
 function popControlPoint(){
 
-    if(selectedPoints.length > 0){
+    if(controlPoints.length > 0){
 
-        const oldSelectedPoints = selectedPoints.slice();
+        const oldcontrolPoints = controlPoints.slice();
         const oldCurvesPoints = curvesPoints.slice();
         const oldControlPointsLabels = controlPointsLabels.slice(0,controlPointsLabels.length-1);
 
         clearScene();
 
-        selectedPoints = oldSelectedPoints;
-        selectedPoints.pop();
+        controlPoints = oldcontrolPoints;
+        controlPoints.pop();
 
         curvesPoints = oldCurvesPoints;
         controlPointsLabels = oldControlPointsLabels;
-
-        console.log(controlPointsLabels);
 
         animate();
     }
@@ -135,15 +142,15 @@ function popControlPoint(){
 
 function popAllControlPoints(){
 
-    if(selectedPoints.length > 0){
+    if(controlPoints.length > 0){
 
-        const oldSelectedPoints = selectedPoints.slice();
+        const oldcontrolPoints = controlPoints.slice();
         const oldCurvesPoints = curvesPoints.slice();
         const oldcontrolPointsLabels = controlPointsLabels.slice();
 
         clearScene();
 
-        selectedPoints = [];
+        controlPoints = [];
         curvesPoints = oldCurvesPoints;
         controlPointsLabels = [];
 
@@ -166,13 +173,13 @@ function popCurve(){
 
     if(curvesPoints.length > 0){
 
-        const oldSelectedPoints = selectedPoints.slice();
+        const oldcontrolPoints = controlPoints.slice();
         const oldCurvesPoints = curvesPoints.slice();
         const oldcontrolPointsLabels = controlPointsLabels.slice();
 
         clearScene();
 
-        selectedPoints = oldSelectedPoints;
+        controlPoints = oldcontrolPoints;
         curvesPoints = oldCurvesPoints;
         curvesPoints.pop();
         controlPointsLabels = oldcontrolPointsLabels;
@@ -188,13 +195,13 @@ function popAllCurves(){
 
     if(curvesPoints.length > 0){
 
-        const oldSelectedPoints = selectedPoints.slice();
+        const oldcontrolPoints = controlPoints.slice();
         const oldCurvesPoints = curvesPoints.slice();
         const oldcontrolPointsLabels = controlPointsLabels.slice();
 
         clearScene();
 
-        selectedPoints = oldSelectedPoints;
+        controlPoints = oldcontrolPoints;
         curvesPoints = [];
         controlPointsLabels = oldcontrolPointsLabels;
 
@@ -207,9 +214,9 @@ function popAllCurves(){
 
 function pushControlPoint(point){
 
-    selectedPoints.push(point.scene);
+    controlPoints.push(point.scene);
 
-    pushControlPointLabel(`p${selectedPoints.length-1}`, point.screen);
+    pushControlPointLabel(`p${controlPoints.length-1}`, point.screen);
 }
 
 function pushControlPointLabel(labelText, [x,y,z]){
@@ -245,8 +252,8 @@ function drawPoints(){
 
     let geometry = new THREE.Geometry();
 
-    for(let i = 0;i < selectedPoints.length;i++){
-        let point = selectedPoints[i];
+    for(let i = 0;i < controlPoints.length;i++){
+        let point = controlPoints[i];
         geometry.vertices.push(new THREE.Vector3( point[0], point[1], point[2]) );
     }
 
@@ -289,6 +296,35 @@ function drawControlPointsLabels(){
     }
     
     renderer.render(scene, camera);
+}
+
+function moveControlPoints(mousePosition, delta){
+
+    if(controlPoints.length > 0){
+        
+        let currControlPoint = null;
+        let currDistance = Infinity;
+        let index = -1;
+
+        for(let i = 0;i < controlPoints.length;i++){
+            const point = controlPoints[i];
+            
+            const distance = vectorDistance(point, mousePosition.scene);
+            
+            if(distance <= delta && distance <= currDistance){
+                currControlPoint = point; 
+                currDistance = distance;
+                index = i;
+            }
+        }
+
+
+        //mover o ponto, o label, e retraçar as curvas!!!!
+        console.log(index);
+
+    }else{
+        alert("Nenhum ponto foi selecionado!");
+    }
 }
 
 function animate(){

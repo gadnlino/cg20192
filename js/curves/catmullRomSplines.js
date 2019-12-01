@@ -15,14 +15,14 @@ function computeCatmullRomSplines(){
 
     let curveVertices = [];
 
-    let n = selectedPoints.length;
+    let n = controlPoints.length;
 
     for(let i = 0;i < n-3;i++){
 
-        const p0 = selectedPoints[i];
-        const p1 = selectedPoints[i+1];
-        const p2 = selectedPoints[i+2];
-        const p3 = selectedPoints[i+3];
+        const p0 = controlPoints[i];
+        const p1 = controlPoints[i+1];
+        const p2 = controlPoints[i+2];
+        const p3 = controlPoints[i+3];
         
         const t0 = 0;
         const t1 = t0 + Math.pow(vectorDistance(p0, p1), alpha);

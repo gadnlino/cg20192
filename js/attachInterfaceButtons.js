@@ -15,7 +15,7 @@ function makeAlert(msg){
 buttonBezier.onclick = function(e){
     console.log('bezier clickado');
 
-    if(selectedPoints.length < 2){
+    if(controlPoints.length < 2){
         makeAlert('Selecione pelo menos 2 pontos');
         return;
     }
@@ -26,7 +26,7 @@ buttonBezier.onclick = function(e){
 buttonSplinesCubicas.onclick = function(e){
     console.log('splines-cubicas clickado');
 
-    if(selectedPoints.length < 4){
+    if(controlPoints.length < 4){
         makeAlert('Selecione pelo menos 4 pontos');
         return;
     }
@@ -37,7 +37,7 @@ buttonSplinesCubicas.onclick = function(e){
 buttonCatmullRom.onclick = function(e){
     console.log('catmull-rom clickado');
 
-    if(selectedPoints.length < 4){
+    if(controlPoints.length < 4){
         makeAlert('Selecione pelo menos 4 pontos');
         return;
     }
@@ -48,7 +48,7 @@ buttonCatmullRom.onclick = function(e){
 buttonHermite.onclick = function(e){
     console.log('hermite clickado');
 
-    if(selectedPoints.length < 2){
+    if(controlPoints.length < 2){
         makeAlert('Selecione pelo menos 2 pontos');
         return;
     }

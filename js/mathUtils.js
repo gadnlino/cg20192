@@ -101,5 +101,3 @@ function sequence(from, to, delta){
         return ret;
     }
 }
-
-//export {addVector, subtractVector, multiplyVector, divideVector, factorial, binomial};

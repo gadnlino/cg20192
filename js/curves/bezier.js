@@ -13,8 +13,8 @@ function computeBezier(){
 
     let curveVertices = [];
 
-    let n = selectedPoints.length;
-    let ndim = selectedPoints[0].length;
+    let n = controlPoints.length;
+    let ndim = controlPoints[0].length;
 
     for(let t = it;t <= ft; t += dx ){
 
@@ -22,7 +22,7 @@ function computeBezier(){
 
         for(let i = 0;i < n;i++){
             
-            let p = selectedPoints[i];
+            let p = controlPoints[i];
             let coef = binomial(n-1,i)*Math.pow(1-t, n-1-i)*Math.pow(t,i);
             let cp = multiplyVector(p, coef);
             bt = addVector(cp,bt);

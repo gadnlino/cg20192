@@ -4,8 +4,7 @@ let botaoLimparPontos = document.getElementById("limpar-pontos");
 let botaoLimparUltimaCurva = document.getElementById("limpar-ultima-curva");
 let botaoLimparCurvas = document.getElementById("limpar-curvas");
 let botaoLimparTudo = document.getElementById('limpar-tudo');
-
-let mouse = new THREE.Vector3();
+let botaoMoverPontos = document.getElementById('mover-pontos');
 
 canvasDiv.onclick = e => {
 
@@ -17,6 +16,8 @@ canvasDiv.onclick = e => {
     let posX = e.clientX - canvasLeft;
     let posY = e.clientY - canvasTop;
     let posZ = 0.5;
+
+    let mouse = new THREE.Vector3();
 
     mouse.x = (posX/canvasWidth)*2 - 1;
     mouse.y = -(posY/canvasHeight)*2 + 1;
@@ -30,9 +31,37 @@ canvasDiv.onclick = e => {
         scene : [mouse.x, mouse.y, mouse.z]
     };
 
-    pushControlPoint(point);
-    
-    animate();
+    switch(currProgramMode){
+
+        case programModes.STANDARD:
+
+            pushControlPoint(point);
+            animate();
+
+            break;
+
+        case programModes.MOVING_POINTS:
+
+            const DELTA = 0.12229631614255307; //tentativa e erro
+
+            moveControlPoints(point, DELTA);
+            
+            break;
+    }
+};
+
+botaoMoverPontos.onclick = e => {
+
+    if(currProgramMode === programModes.STANDARD){
+        setProgramMode(programModes.MOVING_POINTS);
+
+        botaoMoverPontos.innerHTML = "Parar";
+    }
+    else if(currProgramMode === programModes.MOVING_POINTS){
+        setProgramMode(programModes.STANDARD);
+
+        botaoMoverPontos.innerHTML = "Mover pontos";
+    }
 };
 
 botaoLimparUltimoPonto.onclick = () => popControlPoint();
