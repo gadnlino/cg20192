@@ -92,12 +92,13 @@ function clearScene(){
     if(selectedPoints.length > 0 || curvesPoints.length > 0){
         
         while(scene.children.length > 0){
+            
             scene.remove(scene.children[scene.children.length-1]);
         }
     
         curvesPoints = [];
         selectedPoints = [];
-        controlPointsLabels = [];
+        popAllControlPointsLabels();
     
         animate();
     }
@@ -111,9 +112,9 @@ function popControlPoint(){
 
     if(selectedPoints.length > 0){
 
-        const oldSelectedPoints = selectedPoints;
-        const oldCurvesPoints = curvesPoints;
-        const oldcontrolPointsLabels = controlPointsLabels;
+        const oldSelectedPoints = selectedPoints.slice();
+        const oldCurvesPoints = curvesPoints.slice();
+        const oldControlPointsLabels = controlPointsLabels.slice(0,controlPointsLabels.length-1);
 
         clearScene();
 
@@ -121,9 +122,9 @@ function popControlPoint(){
         selectedPoints.pop();
 
         curvesPoints = oldCurvesPoints;
-        controlPointsLabels = oldcontrolPointsLabels;
+        controlPointsLabels = oldControlPointsLabels;
 
-        popControlPointLabel();
+        console.log(controlPointsLabels);
 
         animate();
     }
@@ -136,17 +137,17 @@ function popAllControlPoints(){
 
     if(selectedPoints.length > 0){
 
-        const oldSelectedPoints = selectedPoints;
-        const oldCurvesPoints = curvesPoints;
-        const oldcontrolPointsLabels = controlPointsLabels;
+        const oldSelectedPoints = selectedPoints.slice();
+        const oldCurvesPoints = curvesPoints.slice();
+        const oldcontrolPointsLabels = controlPointsLabels.slice();
 
         clearScene();
 
         selectedPoints = [];
         curvesPoints = oldCurvesPoints;
-        controlPointsLabels = oldcontrolPointsLabels;
+        controlPointsLabels = [];
 
-        popAllControlPointsLabels();
+        //popAllControlPointsLabels();
 
         animate();
     }
@@ -165,9 +166,9 @@ function popCurve(){
 
     if(curvesPoints.length > 0){
 
-        const oldSelectedPoints = selectedPoints;
-        const oldCurvesPoints = curvesPoints;
-        const oldcontrolPointsLabels = controlPointsLabels;
+        const oldSelectedPoints = selectedPoints.slice();
+        const oldCurvesPoints = curvesPoints.slice();
+        const oldcontrolPointsLabels = controlPointsLabels.slice();
 
         clearScene();
 
@@ -187,9 +188,9 @@ function popAllCurves(){
 
     if(curvesPoints.length > 0){
 
-        const oldSelectedPoints = selectedPoints;
-        const oldCurvesPoints = curvesPoints;
-        const oldcontrolPointsLabels = controlPointsLabels;
+        const oldSelectedPoints = selectedPoints.slice();
+        const oldCurvesPoints = curvesPoints.slice();
+        const oldcontrolPointsLabels = controlPointsLabels.slice();
 
         clearScene();
 
@@ -218,17 +219,17 @@ function pushControlPointLabel(labelText, [x,y,z]){
 
     let labelElement = createTextLabel();
     labelElement.setHTML(labelText);
-    labelElement.setParent(textMesh);
-    labelElement.setPosition(x+offsetX, y+offsetY, z+offsetZ);
+    labelElement.setParent(canvasContainer);
+    labelElement.setPosition(x + offsetX, y + offsetY, z + offsetZ);
     labelElement.updatePosition();
 
+    //canvasContainer.appendChild(labelElement.element);
     controlPointsLabels.push(labelElement);
 }
 
 function popControlPointLabel(){
 
-    const lastLabel = controlPointsLabels[controlPointsLabels.length-1];
-    controlPointsLabels.pop();
+    const lastLabel = controlPointsLabels.pop();
 
     canvasContainer.removeChild(lastLabel.element);
 }
@@ -279,7 +280,7 @@ function drawCurves(){
     renderer.render( scene, camera );
 }
 
-function drawcontrolPointsLabels(){
+function drawControlPointsLabels(){
 
     for(let i = 0;i < controlPointsLabels.length;i++){
         const labelInfo = controlPointsLabels[i];
@@ -294,7 +295,7 @@ function animate(){
 
     drawPoints();
     drawCurves();
-    drawcontrolPointsLabels();
+    drawControlPointsLabels();
 }
 
 function onWindowResize(){
