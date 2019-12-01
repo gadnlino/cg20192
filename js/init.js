@@ -1,4 +1,4 @@
-let canvasElement;
+let canvasContainer;
 let menu;
 let w;
 let h;
@@ -11,21 +11,21 @@ let scene;
 let manager;
 let loader;
 let selectedPoints;
-let pointLabels;
+let controlPointsLabels;
 let curvesPoints;
 
 const mode = "2D";
 
 function init(){
 
-    canvasElement = document.getElementById("threejs-canvas-div");
+    canvasContainer = document.getElementById("threejs-canvas-div");
     menu = document.getElementById("menu");
     w = window.innerWidth - menu.clientWidth;
-    h = canvasElement.clientHeight;
+    h = canvasContainer.clientHeight;
 
     renderer = new THREE.WebGLRenderer({antialias: true});
     renderer.setSize( w, h );
-    canvasElement.appendChild(renderer.domElement);
+    canvasContainer.appendChild(renderer.domElement);
     
     manager = new THREE.LoadingManager();
     loader = new THREE.FontLoader(manager);
@@ -43,9 +43,49 @@ function init(){
     scene = new THREE.Scene();
 
     selectedPoints = [];
-    pointLabels = [];
+    controlPointsLabels = [];
     curvesPoints = [];
 }
+
+function createTextLabel(){
+
+    let div = document.createElement('div');
+    div.className = 'text-label';
+    div.style.position = 'absolute';
+    div.style.width = 20;
+    div.style.height = 20;
+    div.innerHTML = "hi there!";
+    div.style.top = -1000;
+    div.style.left = -1000;
+    div.style.color = "aliceblue";
+    
+    let _this = this;
+    
+    return {
+
+      element: div,
+      parent: false,
+      position: new THREE.Vector3(0,0,0),
+      setHTML: function(html) {
+        this.element.innerHTML = html;
+        this.setId(html);
+      },
+      setParent : function(threejsobj) {
+        this.parent = threejsobj;
+      },
+      setPosition : function(x,y,z){
+        this.position.set(x, y, z);
+      },
+      setId : function(id){
+        this.element.id = id;
+      },
+      updatePosition: function() {
+        
+        this.element.style.left = this.position.x + 'px';
+        this.element.style.top = this.position.y + 'px';
+      }
+    };
+};
 
 function clearScene(){
     
@@ -57,7 +97,7 @@ function clearScene(){
     
         curvesPoints = [];
         selectedPoints = [];
-        pointLabels = [];
+        controlPointsLabels = [];
     
         animate();
     }
@@ -67,13 +107,13 @@ function clearScene(){
    
 }
 
-function popPoint(){
+function popControlPoint(){
 
     if(selectedPoints.length > 0){
 
         const oldSelectedPoints = selectedPoints;
         const oldCurvesPoints = curvesPoints;
-        const oldPointLabels = pointLabels;
+        const oldcontrolPointsLabels = controlPointsLabels;
 
         clearScene();
 
@@ -81,8 +121,9 @@ function popPoint(){
         selectedPoints.pop();
 
         curvesPoints = oldCurvesPoints;
-        pointLabels = oldPointLabels;
-        pointLabels.pop();
+        controlPointsLabels = oldcontrolPointsLabels;
+
+        popControlPointLabel();
 
         animate();
     }
@@ -91,27 +132,33 @@ function popPoint(){
     }
 }
 
-function popAllPoints(){
+function popAllControlPoints(){
 
     if(selectedPoints.length > 0){
 
         const oldSelectedPoints = selectedPoints;
         const oldCurvesPoints = curvesPoints;
-        const oldPointLabels = pointLabels;
+        const oldcontrolPointsLabels = controlPointsLabels;
 
         clearScene();
 
         selectedPoints = [];
-
         curvesPoints = oldCurvesPoints;
-        pointLabels = oldPointLabels;
-        pointLabels.pop();
+        controlPointsLabels = oldcontrolPointsLabels;
+
+        popAllControlPointsLabels();
 
         animate();
     }
     else{
         alert("Nenhum ponto foi selecionado!");
     }
+}
+
+function pushCurve(curveVertices){
+
+    curvesPoints.push(curveVertices);
+    animate();
 }
 
 function popCurve(){
@@ -120,15 +167,14 @@ function popCurve(){
 
         const oldSelectedPoints = selectedPoints;
         const oldCurvesPoints = curvesPoints;
-        const oldPointLabels = pointLabels;
+        const oldcontrolPointsLabels = controlPointsLabels;
 
         clearScene();
 
         selectedPoints = oldSelectedPoints;
         curvesPoints = oldCurvesPoints;
         curvesPoints.pop();
-        pointLabels = oldPointLabels;
-        pointLabels.pop();
+        controlPointsLabels = oldcontrolPointsLabels;
 
         animate();
     }
@@ -143,14 +189,13 @@ function popAllCurves(){
 
         const oldSelectedPoints = selectedPoints;
         const oldCurvesPoints = curvesPoints;
-        const oldPointLabels = pointLabels;
+        const oldcontrolPointsLabels = controlPointsLabels;
 
         clearScene();
 
         selectedPoints = oldSelectedPoints;
         curvesPoints = [];
-        pointLabels = oldPointLabels;
-        pointLabels.pop();
+        controlPointsLabels = oldcontrolPointsLabels;
 
         animate();
     }
@@ -159,26 +204,40 @@ function popAllCurves(){
     }
 }
 
-function pushPoint(point){
-    
-    selectedPoints.push(point);
+function pushControlPoint(point){
 
-    pushPointLabel(point, `p${selectedPoints.length-1}`);
+    selectedPoints.push(point.scene);
+
+    pushControlPointLabel(`p${selectedPoints.length-1}`, point.screen);
 }
 
-function pushPointLabel([x,y,z], label){
+function pushControlPointLabel(labelText, [x,y,z]){
 
-    pointLabels.push({
-        text : label,
-        position : {
-            x: x, y: y, z: z
-        }
-    });
+    const offsetX = 2.3, offsetY = 2.3, offsetZ = 0;
+    let textMesh = new THREE.MeshPhongMaterial( { color: 0xffffff } );
+
+    let labelElement = createTextLabel();
+    labelElement.setHTML(labelText);
+    labelElement.setParent(textMesh);
+    labelElement.setPosition(x+offsetX, y+offsetY, z+offsetZ);
+    labelElement.updatePosition();
+
+    controlPointsLabels.push(labelElement);
 }
 
-function pushCurve(curveVertices){
-    curvesPoints.push(curveVertices);
-    animate();
+function popControlPointLabel(){
+
+    const lastLabel = controlPointsLabels[controlPointsLabels.length-1];
+    controlPointsLabels.pop();
+
+    canvasContainer.removeChild(lastLabel.element);
+}
+
+function popAllControlPointsLabels(){
+
+    while(controlPointsLabels.length > 0){
+        popControlPointLabel();
+    }
 }
 
 function drawPoints(){
@@ -220,54 +279,28 @@ function drawCurves(){
     renderer.render( scene, camera );
 }
 
-function drawPointLabels(){
+function drawcontrolPointsLabels(){
 
-    if(font){
+    for(let i = 0;i < controlPointsLabels.length;i++){
+        const labelInfo = controlPointsLabels[i];
 
-        pointLabels.forEach(label=>{
-            const {text, position} = label;
-            const {x,y,z} = position;
-
-            var textGeo = new THREE.TextGeometry( text, {
-
-                font: font,
-                size: 0.5,
-                height: 0.5,
-                weight:'normal',
-                bevelThickness: 2,
-                bevelSize: 1,
-                bevelEnabled: true
-            } );
-        
-            var textMaterial = new THREE.MeshPhongMaterial( { color: 0xffffff } );
-        
-            var mesh = new THREE.Mesh( textGeo, textMaterial );
-
-            const offsetX = 2.3, offsetY = 2.3, offsetZ = 1;
-
-            mesh.position.set( x+offsetX, y+offsetY, z+offsetZ );
-        
-            scene.add( mesh );
-        });
-        
-        // Now, show what the camera sees on the screen:
-        renderer.render(scene, camera);
-
+        canvasContainer.appendChild(labelInfo.element);
     }
-
+    
+    renderer.render(scene, camera);
 }
 
 function animate(){
 
     drawPoints();
     drawCurves();
-    //drawPointLabels();
+    drawcontrolPointsLabels();
 }
 
 function onWindowResize(){
 
     let w = window.innerWidth - menu.clientWidth;
-    let h = canvasElement.clientHeight;
+    let h = canvasContainer.clientHeight;
     camera.aspect = w/ h;
     camera.updateProjectionMatrix();
     renderer.setSize(w, h);

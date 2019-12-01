@@ -18,25 +18,26 @@ canvasDiv.onclick = e => {
     let posY = e.clientY - canvasTop;
     let posZ = 0.5;
 
-    posX = (posX/canvasWidth)*2 - 1;
-    posY = -(posY/canvasHeight)*2 + 1;
-
-    mouse.x = posX;
-    mouse.y = posY;
+    mouse.x = (posX/canvasWidth)*2 - 1;
+    mouse.y = -(posY/canvasHeight)*2 + 1;
     mouse.z = posZ;
 
     mouse.unproject(camera);
 
-    const pos = [mouse.x, mouse.y, mouse.z];
+    const point = {
+        screen : [e.clientX, e.clientY, 0],
+        canvas : [posX, posY, posZ],
+        scene : [mouse.x, mouse.y, mouse.z]
+    };
 
-    pushPoint(pos);
+    pushControlPoint(point);
     
     animate();
 };
 
-botaoLimparUltimoPonto.onclick = () => popPoint();
+botaoLimparUltimoPonto.onclick = () => popControlPoint();
 
-botaoLimparPontos.onclick = () => popAllPoints();
+botaoLimparPontos.onclick = () => popAllControlPoints();
 
 botaoLimparUltimaCurva.onclick = () => popCurve();
 
