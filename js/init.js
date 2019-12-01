@@ -193,6 +193,7 @@ function popControlPoint(){
         controlPoints.pop();
 
         curves = oldcurves;
+        updateCurves();
         controlPointsLabels = oldControlPointsLabels;
 
         animate();
@@ -214,6 +215,7 @@ function popAllControlPoints(){
 
         controlPoints = [];
         curves = oldcurves;
+        updateCurves();
         controlPointsLabels = [];
 
         animate();
@@ -227,6 +229,14 @@ function pushCurve(curve){
 
     curves.push(curve);
     animate();
+}
+
+function removeCurve(i){
+
+    if(i < curvesSize()){
+
+        curves.splice(i,1);
+    }
 }
 
 function popCurve(){
@@ -338,6 +348,35 @@ function drawPoints(){
     renderer.render( scene, camera );
 }
 
+function updateCurves(){
+
+    const curvesToRemove = [];
+    
+    for(let i = 0;i < curvesSize();i++){
+
+        const curve = getCurve(i);
+        const {controlPointsIndex} = curve;
+        let pointsInControlPoints = 0;
+
+        if(controlPointsIndex){
+
+            const index = sequence(0, controlPointsSize() - 1, 1);
+
+            controlPointsIndex.forEach(idx=>{
+                if(index && idx in index){
+                    pointsInControlPoints++;
+                }
+            });
+
+            if(pointsInControlPoints < controlPointsIndex.length){
+                curvesToRemove.push(i);
+            }
+        }
+    }
+
+    curvesToRemove.forEach(curveIndex=>removeCurve(curveIndex));
+}
+
 function drawCurves(){
 
     for(let i = 0;i < curvesSize();i++){
@@ -351,6 +390,8 @@ function drawCurves(){
             setCurve(i, {...curve, controlPointsIndex : controlPointsIndex});
         }
     }
+
+    //updateCurves();
 
     for(let i = 0;i < curvesSize();i++){
 
