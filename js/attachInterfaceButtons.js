@@ -1,8 +1,3 @@
-import {drawCubicSplines} from './curves/cubicSplines.js';
-import {drawBezier} from './curves/bezier.js';
-import {drawCatmullRomSplines} from './curves/catmullRomSplines.js';
-import {drawHermite} from './curves/hermite.js';
-
 let buttonBezier = document.getElementById('BEZIER');
 let buttonSplinesCubicas = document.getElementById('CUBIC_SPLINE');
 let buttonCatmullRom = document.getElementById('CATMULL_ROM');
@@ -26,44 +21,44 @@ function switchCurveButton(e){
 
     switch(id){
         
-        case "BEZIER":
+        case curveTypes.BEZIER:
 
             if(controlPointsSize() < 2){
                 makeAlert('Selecione pelo menos 2 pontos');
                 break;
             }
 
-            drawBezier();
+            pushCurve({type : curveTypes.BEZIER});
             break;
 
-        case "CUBIC_SPLINE":
+        case curveTypes.CUBIC_SPLINE:
 
             if(controlPointsSize() < 4){
                 makeAlert('Selecione pelo menos 4 pontos');
                 break;
             }
 
-            drawCubicSplines();
+            pushCurve({type : curveTypes.CUBIC_SPLINE});
             break; 
         
-        case "CATMULL_ROM":
+        case curveTypes.CATMULL_ROM:
             
             if(controlPointsSize() < 4){
                 makeAlert('Selecione pelo menos 4 pontos');
                 break;
             }
 
-            drawCatmullRomSplines();
+            pushCurve({type : curveTypes.CATMULL_ROM});
             break;
 
-        case "HERMITE":
+        case curveTypes.HERMITE:
     
                 if(controlPointsSize() < 2){
                     makeAlert('Selecione pelo menos 2 pontos');
                     break;
                 }
     
-                drawHermite();
+                pushCurve({type : curveTypes.HERMITE});
                 break;
     }
 }

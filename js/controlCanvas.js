@@ -53,12 +53,23 @@ let handleMouseMoveEvent = e => {
                 
                 setControlPoint(selection.index, mouseXyz);
                 const points = getControlPoints();
-                
-                popAllControlPoints();
+                const curves = getCurves();
+
+                if(controlPointsSize() > 0){
+                    popAllControlPoints();
+                }
+
+                if(curvesSize() > 0){
+                    popAllCurves();
+                }
 
                 for(let i = 0;i < points.length;i++){
                     
                     pushControlPoint(points[i]);
+                }
+
+                for(let i = 0;i < curves.length;i++){
+                    pushCurve(curves[i]);
                 }
 
                 animate();

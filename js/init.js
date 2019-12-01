@@ -15,6 +15,13 @@ let controlPointsLabels;
 let curves;
 let raycaster;
 
+const curveTypes = {
+    BEZIER : "BEZIER",
+    CUBIC_SPLINE : "CUBIC_SPLINE",
+    CATMULL_ROM : "CATMULL_ROM",
+    HERMITE : "HERMITE"
+};
+
 const programModes = {
     MOVING_POINTS : "MOVING_POINTS",
     STANDARD : "STANDARD"
@@ -53,7 +60,6 @@ function init(){
     curves = [];
 
     raycaster = new THREE.Raycaster();
-
 }
 
 function getCurves(){
@@ -64,6 +70,13 @@ function getCurve(i){
 
     if(i < curvesSize()){
         return curves[i];
+    }
+}
+
+function setCurve(i, curve){
+
+    if(i < curvesSize()){
+        curves[i] = curve;
     }
 }
 
@@ -210,9 +223,9 @@ function popAllControlPoints(){
     }
 }
 
-function pushCurve(curveVertices){
+function pushCurve(curve){
 
-    curves.push(curveVertices);
+    curves.push(curve);
     animate();
 }
 
@@ -327,21 +340,56 @@ function drawPoints(){
 
 function drawCurves(){
 
-    for(let i = 0;i < curves.length;i++){
+    for(let i = 0;i < curvesSize();i++){
 
-        let geometry = new THREE.Geometry();
-        let material = new THREE.LineBasicMaterial( { color: 0xffffff } );
+        const curve = getCurve(i);
 
-        const {type, points} = curves[i].points;
-        
-        for(let j = 0;j < points.length;j++){
-            
-            const point = points[j];
-            geometry.vertices.push(new THREE.Vector3( point[0], point[1], point[2]) );
+        if(!curve.controlPointsIndex){
+
+            const controlPointsIndex = getControlPoints().map((e,i)=>i);
+
+            setCurve(i, {...curve, controlPointsIndex : controlPointsIndex});
+        }
+    }
+
+    for(let i = 0;i < curvesSize();i++){
+
+        const {type, controlPointsIndex} = getCurve(i);
+
+        const controlPoints = getControlPoints().filter((e,i)=>i in controlPointsIndex);
+
+        if(controlPoints.length > 0){
+
+            let geometry = new THREE.Geometry();
+            let material = new THREE.LineBasicMaterial( { color: 0xffffff } );
+
+            let points;
+
+            switch(type){
+                case curveTypes.BEZIER:
+                    points = computeBezier(controlPoints);
+                    break;
+                case curveTypes.CUBIC_SPLINE:
+                    points = computeCubicSplines(controlPoints);
+                    break;
+                case curveTypes.CATMULL_ROM:
+                    points = computeCatmullRomSplines(controlPoints);
+                    break;
+                case curveTypes.HERMITE:
+                    points = computeHermite(controlPoints);
+                    break;
+            }
+
+            for(let j = 0;j < points.length;j++){
+                
+                const point = points[j];
+                geometry.vertices.push(new THREE.Vector3( point[0], point[1], point[2]) );
+            }
+
+            let line = new THREE.Line( geometry, material );
+            scene.add( line );
         }
 
-        let line = new THREE.Line( geometry, material );
-        scene.add( line );
     }
 
     renderer.render( scene, camera );

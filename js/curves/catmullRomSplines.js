@@ -1,30 +1,22 @@
-export function drawCatmullRomSplines(){
-    computeCatmullRomSplines();
-    animate();
-}
-
 let tension = 0.25;
 let alpha = 1;
-let dx = 1/1e2;
-let it = 0, ft = 1;
-
-const curveType = "CATMULL_ROM";
+let dtCR = 1/1e2;
+let itCR = 0, ftCR = 1;
 
 //Extraído de 
 //https://qroph.github.io/2018/07/30/smooth-paths-using-catmull-rom-splines.html
-function computeCatmullRomSplines(){
-    
+function computeCatmullRomSplines(controlPoints){
 
     let curveVertices = [];
 
-    let n = controlPointsSize();
+    let n = controlPoints.length;
 
     for(let i = 0;i < n-3;i++){
 
-        const p0 = getControlPoint(i).scene;    
-        const p1 = getControlPoint(i+1).scene;
-        const p2 = getControlPoint(i+2).scene;
-        const p3 = getControlPoint(i+3).scene;
+        const p0 = controlPoints[i].scene;    
+        const p1 = controlPoints[i+1].scene;
+        const p2 = controlPoints[i+2].scene;
+        const p3 = controlPoints[i+3].scene;
         
         const t0 = 0;
         const t1 = t0 + Math.pow(vectorDistance(p0, p1), alpha);
@@ -43,7 +35,6 @@ function computeCatmullRomSplines(){
                                     addVector(divideVector(subtractVector(p3,p1), t3-t1), 
                                                 divideVector(subtractVector(p3,p2), t3-t2))),
                                 (1.0-tension)*(t2-t1));
-        //console.log(m1,m2);
 
         const a = addVector(multiplyVector(subtractVector(p1,p2), 2.0), addVector(m1,m2));
         const b = addVector(multiplyVector(subtractVector(p1,p2), -3.0), 
@@ -51,16 +42,13 @@ function computeCatmullRomSplines(){
         const c = m1;
         const d = p1;
 
-        //console.log(a,b,c,d);
-
-        for(let t = it;t <= ft;t+=dx){
+        for(let t =itCR;t <= ftCR;t+=dtCR){
             
             const g3 = multiplyVector(a, Math.pow(t,3));
             const g2 = multiplyVector(b, Math.pow(t,2));
             const g1 = multiplyVector(c,t);
 
             const point = addVector(g3, addVector(g2, addVector(g1, d)));
-            //console.log(point);
 
             /*const m1 = [Math.pow(t,3), Math.pow(t,2), t, 1];
             const m2 = [[-1, 3, -3, 1], [2, -5, 4, 1], [-1, 0, 1, 0],[0, 2, 0, 0]];
@@ -72,8 +60,5 @@ function computeCatmullRomSplines(){
         }
     }
 
-    pushCurve({
-        type : curveType,
-        points : curveVertices
-    });
+   return curveVertices;
 }
