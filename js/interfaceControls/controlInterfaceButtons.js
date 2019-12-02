@@ -2,6 +2,12 @@ let buttonBezier = document.getElementById('BEZIER');
 let buttonSplinesCubicas = document.getElementById('CUBIC_SPLINE');
 let buttonCatmullRom = document.getElementById('CATMULL_ROM');
 let buttonHermite = document.getElementById('HERMITE');
+let buttonAbrirModalInstrucoes = document.getElementById("button-abrir-modal-instrucoes");
+let buttonFecharModalInstrucoes = document.getElementById("button-fechar-modal-instrucoes");
+let buttonAbrirModalCreditos = document.getElementById("button-abrir-modal-creditos");
+let buttonFecharModalCreditos = document.getElementById("button-fechar-modal-creditos")
+
+let previousProgramMode = null;
 
 buttonBezier.onclick = e => switchCurveButton(e);
 
@@ -62,3 +68,25 @@ function switchCurveButton(e){
                 break;
     }
 }
+
+buttonAbrirModalInstrucoes.onclick = () =>{
+    previousProgramMode = getProgramMode();
+    setProgramMode(programModes.VIEWING_INSTRUCTIONS);
+    document.getElementById("modal-instrucoes").style.display='block';
+};
+
+buttonFecharModalInstrucoes.onclick = () =>{
+    setProgramMode(previousProgramMode);
+    document.getElementById('modal-instrucoes').style.display='none';
+};
+
+buttonAbrirModalCreditos.onclick = () =>{
+    previousProgramMode = getProgramMode();
+    setProgramMode(programModes.VIEWING_CREDITS);
+    document.getElementById("modal-creditos").style.display='block';
+};
+
+buttonFecharModalCreditos.onclick = () =>{
+    setProgramMode(previousProgramMode);
+    document.getElementById('modal-creditos').style.display='none';
+};

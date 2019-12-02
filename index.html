@@ -1,6 +1,6 @@
 <html>
 	<head>
-		<title>Curvas parametricas</title>
+		<title>Visualizador de curvas paramétricas</title>
 		<link href="css/style.css" rel="stylesheet">
 		<link 
 			rel="stylesheet" 
@@ -8,42 +8,81 @@
 			integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" 
 			crossorigin="anonymous"
 		>
+		<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 	</head>
 	<body>
+
+		<!-- The Modal -->
+		<div id="modal-instrucoes" class="w3-modal">
+			<div class="w3-modal-content">
+				<div class="w3-container">
+				<span
+					id="button-fechar-modal-instrucoes"
+					class="w3-button w3-display-topright">&times;</span>
+				<p>Clique no canvas para escolher os pontos de controle. </p>
+				<p>Depois, clique na curva desejada para traçá-la.</p>
+				<p>Para mover os pontos, clique em <strong>Mover pontos</strong> e arraste o ponto no canvas.</p>
+				<p>Para parar de mover os pontos, clique em <strong>Parar de mover</strong>.</p>
+				<p>Para apagar o ultimo ponto, clique em <strong>Limpar último ponto</strong>.</p>
+				<p>Para apagar a ultimo curva, clique em <strong>Limpar última curva</strong>.</p>
+				<p>Para apagar todos os pontos, clique em <strong>Limpar todos os pontos</strong>.</p>
+				<p>Para apagar todos as curvas, clique em <strong>Limpar todas as curvas</strong>.</p>
+				<p>Para tudo, clique em <strong>Limpar tudo</strong>.</p>
+				</div>
+			</div>
+		</div>
+
+		<div id="modal-creditos" class="w3-modal">
+			<div class="w3-modal-content">
+				<div class="w3-container">
+				<span
+					id="button-fechar-modal-creditos"
+					class="w3-button w3-display-topright">&times;</span>
+					<p><strong>Segundo trabalho de Computação Gráfica I - 2019.2</strong></p>
+					<p>Universidade Federal do Rio de Janeiro</p>
+					<p>Aluno : Guilherme Avelino do Nascimento</p>
+					<p>DRE : 117078497</p>
+					<p><strong><a href="https://github.com/gadnlino/cg20192" target="_blank">Link do Github</a></strong> do projeto</p>
+				</div>
+			</div>
+		</div>
+
+		
+
 		<div id="menu" class="left">
 			<div class="top2">
-				<p class="instrucoes" id="instrucoes">
+				<!--<p class="instrucoes" id="instrucoes">
 					Clique para escolher os pontos, 
 					e depois clique na curva desejada
-				</p>
+				</p>-->
+				<div style="padding-bottom: 15px;">
+					<button
+						id="button-abrir-modal-instrucoes"
+						class="w3-button"
+					>
+						Instruções
+					</button>
+				</div>
+				<div class="button-wrapper" style="padding-bottom: 2px;">
+					<button id="BEZIER">Bezier</button>
+					<button id="CUBIC_SPLINE">B-splines cubicas</button>
+					<button id="CATMULL_ROM">Catmull-Rom splines</button>
+					<button id="HERMITE">Hermite</button>
+			</div>
 				
 				<div id="selected-points-element"></div>
 				
 			</div>
 
 			<div class="bot2">
-				<div class="button-wrapper" style="padding-bottom: 2px;">
-						<button id="BEZIER">Bezier</button>
-				</div>
-				<div class="button-wrapper" style="padding-bottom: 2px;">
-						<button id="CUBIC_SPLINE">B-splines cubicas</button>
-				</div>
 
-				<div class="button-wrapper" style="padding-bottom: 2px;">
-						<button id="CATMULL_ROM">Catmull-Rom splines</button>
-				</div>
-
-				<div class="button-wrapper" style="padding-bottom: 30px; ">
-						<button id="HERMITE">Hermite</button>
-				</div>
-
-				<div class="button-wrapper" style="padding-bottom: 50px;">
+				<div class="button-wrapper" style="padding-bottom: 25px; padding-top: 25px;">
 						<button id="mover-pontos" style="background-color: palegreen;">
 							Mover pontos
 						</button>
 				</div>
 
-				<div class="buttons-wrapper" style="padding: 2px;">
+				<div class="button-wrapper">
 						<button class="botao-resetar" id="limpar-ultimo-ponto">
 							Limpar último ponto
 						</button>					
@@ -61,8 +100,16 @@
 						</button>
 				</div>
 
+				<div style="padding-top: 25px;">
+						<button
+							id="button-abrir-modal-creditos"
+							class="w3-button"
+						>
+							Créditos
+						</button>
+					</div>
+
 			</div>
-			
 		</div>
 
 		<div id="threejs-canvas-div" class="center"></div>
@@ -72,14 +119,17 @@
 		crossorigin="anonymous"
 	>
 	</script>
-	<script src="js/three.js" type="text/javascript"></script>
-	<script src="js/math.js" type="text/javascript"></script>
+	<script src="js/lib/three.js" type="text/javascript"></script>
+	<script src="js/lib/math.js" type="text/javascript"></script>
+	<script src="js/objectControls/controlLabels.js" type="text/javascript"></script>
+	<script src="js/objectControls/controlCurves.js" type="text/javascript"></script>
+	<script src="js/objectControls/controlControlPoints.js" type="text/javascript"></script>
 	<script src="js/init.js" type="text/javascript"></script>
-	<script src="js/mathUtils.js" type="text/javascript"></script>
+	<script src="js/utils/mathUtils.js" type="text/javascript"></script>
 	<script src="js/curves/bezier.js" type="text/javascript"></script>
 	<script src="js/curves/cubicSplines.js" type="text/javascript"></script>
 	<script src="js/curves/catmullRomSplines.js" type="text/javascript"></script>
 	<script src="js/curves/hermite.js" type="text/javascript"></script>
-	<script src="js/controlCanvas.js" type="text/javascript"></script>
-	<script src="js/attachInterfaceButtons.js" type="module"></script>
+	<script src="js/interfaceControls/controlCanvas.js" type="text/javascript"></script>
+	<script src="js/interfaceControls/controlInterfaceButtons.js" type="module"></script>
 </html>
