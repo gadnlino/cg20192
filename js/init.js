@@ -13,7 +13,6 @@ let loader;
 let controlPoints;
 let controlPointsLabels;
 let curves;
-let raycaster;
 
 const curveTypes = {
     BEZIER : "BEZIER",
@@ -58,8 +57,6 @@ function init(){
     controlPoints = [];
     controlPointsLabels = [];
     curves = [];
-
-    raycaster = new THREE.Raycaster();
 }
 
 function getCurves(){
@@ -150,9 +147,7 @@ function createTextLabel(){
     div.style.top = -1000;
     div.style.left = -1000;
     div.style.color = "aliceblue";
-    
-    let _this = this;
-    
+        
     return {
 
       element: div,
@@ -207,9 +202,7 @@ function popAllControlPoints(){
 
     if(controlPoints.length > 0){
 
-        const oldcontrolPoints = controlPoints.slice();
         const oldcurves = curves.slice();
-        const oldcontrolPointsLabels = controlPointsLabels.slice();
 
         clearScene();
 
@@ -266,7 +259,6 @@ function popAllCurves(){
     if(curves.length > 0){
 
         const oldcontrolPoints = controlPoints.slice();
-        const oldcurves = curves.slice();
         const oldcontrolPointsLabels = controlPointsLabels.slice();
 
         clearScene();
@@ -292,21 +284,6 @@ function pushControlPoint(point){
 function pushControlPointLabel(labelText, [x,y,z]){
 
     const offsetX = 2.3, offsetY = 2.3, offsetZ = 0;
-    let textMesh = new THREE.MeshPhongMaterial( { color: 0xffffff } );
-
-    let labelElement = createTextLabel();
-    labelElement.setHTML(labelText);
-    labelElement.setParent(canvasContainer);
-    labelElement.setPosition(x + offsetX, y + offsetY, z + offsetZ);
-    labelElement.updatePosition();
-
-    controlPointsLabels.push(labelElement);
-}
-
-function setControlPointLabel(i, labelText, [x,y,z]){
-
-    const offsetX = 2.3, offsetY = 2.3, offsetZ = 0;
-    let textMesh = new THREE.MeshPhongMaterial( { color: 0xffffff } );
 
     let labelElement = createTextLabel();
     labelElement.setHTML(labelText);
