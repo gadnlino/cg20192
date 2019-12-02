@@ -391,8 +391,6 @@ function drawCurves(){
         }
     }
 
-    //updateCurves();
-
     for(let i = 0;i < curvesSize();i++){
 
         const {type, controlPointsIndex} = getCurve(i);

@@ -22,7 +22,7 @@ function computeCubicSplines(controlPoints){
         for(let u = iuS;u <= fuS;u += duS){
 
             const m1 = [Math.pow(u,3),Math.pow(u,2),u,1];
-            const m2 = [[-1, 3, -3, 1], [3, -6, 3, 4], [-3, 0, 3, 0], [1, 4, 1, 0]];
+            const m2 = [[-1, 3, -3, 1], [3, -6, 3, 0], [-3, 0, 3, 0], [1, 4, 1, 0]];
             const m3 = [p0,p1,p2,p3];
 
             const r = math.multiply(1/6, math.multiply(m1, math.multiply(m2,m3)));
@@ -32,4 +32,3 @@ function computeCubicSplines(controlPoints){
 
    return curveVertices;
 }
-
